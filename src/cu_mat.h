@@ -45,7 +45,8 @@ class Matrix
 		void pow(float val);
 
 		/* Matrix Multiplication */
-		void dot(const Matrix &val);
+		void dot(const Matrix &val);               		// matrix mult in-place
+		Matrix operator%(const Matrix &val) const;      // matrix mult and return
 
 		/* Matrix setter */
 		void operator=(const Matrix &val);
@@ -358,6 +359,25 @@ void Matrix::dot(const Matrix &val)
 }
 
 /*
+Matrix Matrix::operator% (const Matrix &val) const
+{
+	assert(cols == val.rows());
+	
+	Matrix item (rows, val.cols);
+	
+	if (!cuda)
+	{
+		item.mat = mat * val.mat;
+	} else {
+		item.ToDevice();
+		cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, handle);
+		cudaDeviceSynchronize();
+	}
+
+	return item;
+} */
+
+/*
  *
  *
  * -------------- Equal Operator -------------- 
@@ -661,6 +681,5 @@ Matrix Matrix::operator/(const Matrix &val) const
 		
 	return item;
 }
-
 
 #endif
