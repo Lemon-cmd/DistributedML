@@ -6,8 +6,8 @@
 using std::string;
 
 typedef Eigen::MatrixXf Tensor2d;
-typedef std::pair <uint, uint> Shape;
-typedef std::tuple <uint, uint, uint, string, float, float> Metadata; 
+typedef std::pair <size_t, size_t> Shape;
+typedef std::tuple <size_t, size_t, size_t, string, float, float> Metadata; 
 
 class Dense 
 {

@@ -1,72 +1,105 @@
 #include "modules.h"
 #include "dense.h"
+#include "cu_mat.h"
 
 #include <cuda.h>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
-void gpu_blas_mmul(const float *A, const float *B, float *C,
-			   const int m, const int k, const int n, cublasHandle_t& handle)
-{
-
-	int lda = m, ldb = k, ldc = m;
-	const float alpha = 1, beta = 0;
-
-	cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-				m, n, k,
-				&alpha, A, lda,
-				B, ldb, &beta,
-				C, ldc);
-}
-
-__global__ void add_arrs(const float *A, const float *B, float *C, size_t size)
-{
-	const uint stride = blockDim.x * gridDim.x;
-    const uint tid = blockDim.x * blockIdx.x + threadIdx.x;
-	
-	for (uint j = tid; j < size; j += stride) 
-	{
-		C[j] = A[j] + B[j];
-	}
-}
-
-
-
 int main()
 {
-	cublasHandle_t handle;
-	cublasCreate(&handle);
-
-
-	Eigen::MatrixXf X = Eigen::MatrixXf::Random(2, 2), Y = Eigen::MatrixXf::Random(2, 1);
-
-	std::cout << X << "\n\n" << Y << std::endl;
-
-	float *x, *y, *r, *o;
-
-	cudaMalloc(&x, X.size() * sizeof(float));
-	cudaMalloc(&y, Y.size() * sizeof(float));
+	Matrix X (2, 1), Y(1, 2);
 	
-	cudaMemcpy(x, X.data(), X.size() * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(y, Y.data(), Y.size() * sizeof(float), cudaMemcpyHostToDevice);
+	// it is better to fill matrix on the cpu first
+	X.ToDevice();
+	Y.ToDevice();
 
-	cudaMalloc(&r, X.rows() * Y.cols() * sizeof(float));
+	// fill matrix with a val
+	//X.Constant(2.0);
+	//Y.Constant(4.0);
 
-	//add_arrs <<<1, 1>>> (x, y, r, X.size());
-	//cudaDeviceSynchronize();
-
-	gpu_blas_mmul(x, y, r, X.rows(), X.cols(), Y.cols(), handle);
-	cudaDeviceSynchronize();
+	// fill matrix with vals of a given range
+	//X.Uniform(-0.2, 0.2);
+	//Y.Uniform(-0.2, 0.2);
 	
-	o = (float*) calloc(X.rows() * Y.cols(), sizeof(float));
-	cudaMemcpy(o, r, X.rows() * Y.cols() * sizeof(float), cudaMemcpyDeviceToHost);
+	// fill matrice with rand. vals 0 -> 1
+	X.Random();
+	Y.Random();
 
-	Eigen::MatrixXf R = Eigen::Map <Eigen::MatrixXf> (o, X.rows(), Y.cols());
-	std::cout << '\n' <<  R << '\n';
+	/* ToHost() simply copy from device to host */
+	X.ToHost();
+	Y.ToHost();
+	std::cout << X << '\n' << Y << std::endl;
 
-	cudaFree(x);
-	cudaFree(y);
-	cudaFree(r);
-	free(o);
-	cublasDestroy(handle);	
+	// transpose and return a matrix
+	Matrix XT = X.transpose();
+	XT.ToHost();
+	std::cout << XT << '\n';
+	
+	X.T(); // transpose in place
+	X.ToHost();
+	std::cout << "Transpose In Place:\n\n" << X << '\n';
+
+	X.T(); 
+	X.dot(Y); // matrix mult in place
+	X.ToHost();
+	std::cout << X << '\n';
+
+	/* Non in-place math operators */
+	std::cout << "Non in-place math operators\n\n";
+
+	X = X + 1.0;
+	X.ToHost();
+	std::cout << X << '\n'; 
+
+	X = X + Y;
+	X.ToHost();
+
+	std::cout << X << '\n'; 
+
+	X = X / Y;
+	X.ToHost();
+	std::cout << X << '\n'; 
+
+	X = X * Y;
+	X.ToHost();
+	std::cout << X << '\n'; 
+
+	// To complete remove matrix from GPU
+	X.cpu();
+	Y.cpu();
+
+	// Call ToHost() only move from device to host
+
+	/* In-place math operators */
+	std::cout << "In-place math operators\n\n";
+
+	X = Matrix(5, 5), Y = Matrix(5, 5);
+	X.Uniform(-0.2, 0.2);
+	Y.Uniform(-5, 5);
+
+	X.ToDevice();
+	Y.ToDevice();
+
+	X += Y;
+	X.ToHost();
+	std::cout << X << '\n'; 
+
+	X -= Y;
+	X.ToHost();
+	std::cout << X << '\n'; 
+
+	X *= Y;
+	X.ToHost();
+	std::cout << X << '\n'; 
+
+	X /= Y;
+	X.ToHost();
+	std::cout << X << '\n'; 
+	
+	X.pow(3.0);
+	X.ToHost();
+	std::cout << X << '\n'; 
+	
+	cudaDeviceReset();	
 }
