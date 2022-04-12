@@ -1,1 +1,1 @@
-# DistribLearning
+# Distributed Machine Learning Project
