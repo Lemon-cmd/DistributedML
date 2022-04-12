@@ -8,7 +8,7 @@
 
 int main()
 {
-	Matrix X (2, 1), Y(1, 2);
+	Matrix X (2, 2), Y(2, 2);
 	
 	// it is better to fill matrix on the cpu first
 	X.ToDevice();
@@ -57,10 +57,14 @@ int main()
 
 	std::cout << X << '\n'; 
 
+	std::cout << "Division\n";
 	X = X / Y;
 	X.ToHost();
 	std::cout << X << '\n'; 
+	std::cout << Y << '\n'; 
 
+
+	std::cout << "Multiply\n";
 	X = X * Y;
 	X.ToHost();
 	std::cout << X << '\n'; 
@@ -100,6 +104,4 @@ int main()
 	X.pow(3.0);
 	X.ToHost();
 	std::cout << X << '\n'; 
-	
-	cudaDeviceReset();	
 }

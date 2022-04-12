@@ -11,6 +11,7 @@ class Matrix
 {
 	public:
 		/* Constructors */
+		Matrix();
 		Matrix(size_t r); 
 		Matrix(size_t r, size_t c);
 
@@ -20,7 +21,7 @@ class Matrix
 		/* Destructor */
 		~Matrix() 
 		{ 
-			cudaFree(dev_mat); 
+			deallocDevMat(); 
 			if (cuda) cublasDestroy(handle);
 		}
 		
@@ -111,16 +112,19 @@ class Matrix
 		
 		cublasHandle_t handle;
 
-		void allocDevice()
+		void deallocDevMat()
 		{
-			if (cuda) {
+			if (dev_mat != nullptr)
+			{
 				cudaFree(dev_mat);
-				
-				cudaMalloc(&dev_mat, bytes());
-				
-				cudaMemcpy(dev_mat, mat.data(), bytes(), 
-						   cudaMemcpyHostToDevice);
-			}	
+			}
+		}
+
+		void allocDevice(const float *val)
+		{
+			deallocDevMat();
+			cudaMalloc(&dev_mat, bytes());
+			cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
 		}
 
        	float randint (float min, float max) const {
@@ -164,22 +168,26 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
  *
  *  */
 
+Matrix::Matrix() { dev_mat = nullptr; }
 
 Matrix::Matrix(size_t r) { Matrix(r, 1); }
 
 Matrix::Matrix(size_t r, size_t c) : rows(r), cols(c)
 {
+	Matrix();
 	mat = Tensor2d::Zero(rows, cols);
 }
 
 Matrix::Matrix(const std::vector<float> &arr)
 {
+	Matrix();
 	rows = 1, cols = arr.size();
 	mat = Eigen::Map <const Tensor2d> (arr.data(), rows, cols); 
 }
 
 Matrix::Matrix(size_t r, size_t c, const std::vector<float>& arr)
 {
+	Matrix();
 	rows = r, cols = c;
 	mat = Eigen::Map <const Tensor2d> (arr.data(), rows, cols);	
 }
@@ -199,7 +207,7 @@ void Matrix::cpu()
 {
 	ToHost();
 	cuda = false;
-	cudaFree(dev_mat);
+	deallocDevMat();	
 }
 
 void Matrix::ToHost() 
@@ -211,9 +219,13 @@ void Matrix::ToHost()
 
 void Matrix::ToDevice()
 {
+	allocDevice(mat.data());
+
+	if (!cuda) {
+		cublasCreate(&handle);
+	}
+
 	cuda = true;
-	allocDevice();
-	cublasCreate(&handle);
 } 
 
 /* 
@@ -229,7 +241,7 @@ void Matrix::ToDevice()
 void Matrix::Random()
 {
 	mat = Tensor2d::Random(rows, cols);
-	allocDevice();
+	allocDevice(mat.data());
 }
 
 void Matrix::Constant(float val)
@@ -246,7 +258,7 @@ void Matrix::Constant(float val)
 void Matrix::Uniform(float min, float max)
 {
 	mat = Tensor2d::NullaryExpr(rows, cols, [&, this]() { return this->randint(min, max); } );
-	allocDevice();	
+	allocDevice(mat.data());	
 }
 
 /*
@@ -273,7 +285,7 @@ void Matrix::T()
 		cublas_transpose(dev_mat, new_mat, rows, cols, handle); 		
 		cudaDeviceSynchronize();
 
-		cudaFree(dev_mat);
+		deallocDevMat();
 		dev_mat = new_mat;
 	}
 
@@ -291,6 +303,7 @@ Matrix Matrix::transpose()
 
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());	
 		cudaMemset(item.dev_mat, 0.0, bytes());
 		
@@ -339,7 +352,7 @@ void Matrix::dot(const Matrix &val)
 		cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
 		cudaDeviceSynchronize();
 
-		cudaFree(dev_mat);
+		deallocDevMat();
 		dev_mat = new_mat;
 	}
 }
@@ -357,7 +370,7 @@ void Matrix::operator=(const Matrix &val)
 	mat = val.mat;
 	rows = val.rows;
 	cols = val.cols;
-	cudaFree(dev_mat);
+	deallocDevMat();
 	
 	if (val.cuda) 
 	{
@@ -431,6 +444,7 @@ Matrix Matrix::operator+(float val) const
 
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		add_arr_val<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val, this->size());
@@ -450,8 +464,10 @@ Matrix Matrix::operator-(float val) const
 
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+
 		minus_arr_val<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
@@ -469,6 +485,7 @@ Matrix Matrix::operator*(float val) const
 		return item;
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		mult_arr_val<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val, this->size());
@@ -565,6 +582,7 @@ void Matrix::operator/=(const Matrix &val)
 
 Matrix Matrix::operator+(const Matrix &val) const
 {
+	assert(val.rows == rows && val.cols == cols);
 	Matrix item (rows, cols);
 
 	if (!cuda)
@@ -572,6 +590,7 @@ Matrix Matrix::operator+(const Matrix &val) const
 		item.mat = mat.array() + val.mat.array();
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		add_arr<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val.dev_mat, this->size());
@@ -583,6 +602,7 @@ Matrix Matrix::operator+(const Matrix &val) const
 
 Matrix Matrix::operator-(const Matrix &val) const
 {
+	assert(val.rows == rows && val.cols == cols);
 	Matrix item (rows, cols);
 
 	if (!cuda)
@@ -590,6 +610,7 @@ Matrix Matrix::operator-(const Matrix &val) const
 		item.mat = mat.array() - val.mat.array();
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		minus_arr<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val.dev_mat, this->size());
@@ -601,6 +622,7 @@ Matrix Matrix::operator-(const Matrix &val) const
 
 Matrix Matrix::operator*(const Matrix &val) const
 {
+	assert(val.rows == rows && val.cols == cols);
 	Matrix item (rows, cols);
 
 	if (!cuda)
@@ -609,6 +631,7 @@ Matrix Matrix::operator*(const Matrix &val) const
 
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		mult_arr<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val.dev_mat, this->size());
@@ -620,6 +643,8 @@ Matrix Matrix::operator*(const Matrix &val) const
 
 Matrix Matrix::operator/(const Matrix &val) const
 {
+	assert(val.rows == rows && val.cols == cols);
+
 	Matrix item (rows, cols);
 
 	if (!cuda)
@@ -627,6 +652,7 @@ Matrix Matrix::operator/(const Matrix &val) const
 		item.mat = mat.array() - val.mat.array();
 	} else {
 		item.cuda = true;
+		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		div_arr<float> <<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>> (item.dev_mat, val.dev_mat, this->size());
