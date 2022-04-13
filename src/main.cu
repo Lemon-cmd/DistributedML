@@ -7,8 +7,8 @@ int main()
 {
 	Matrix X(2, 1), Y(2, 1);
 
-	X.Uniform(-20, 20);
-	Y.Uniform(-25, 20);
+	X.Uniform(-1, 1);
+	Y.Uniform(-1, 1);
 
 	// it is better to fill matrix on the cpu first
 	X.ToDevice();
@@ -25,17 +25,10 @@ int main()
 			  << '\n'
 			  << Y << std::endl;
 
-	X.Sign();
+	X = 1.0 - X;
 	X.ToHost();
-	std::cout << "Sign X:\n"
-			  << X << '\n';
+	std::cout << X << std::endl;
 
-	/*
-	X.pow(2.0);
-	X *= -1.0;
-	X += 1.0;
-	X.ToHost();
-	std::cout << "d(tanh X):\n"
-			  << X << '\n';
-	*/
+	Y = 2.0 / Y;
+	std::cout << Y << std::endl;
 }
