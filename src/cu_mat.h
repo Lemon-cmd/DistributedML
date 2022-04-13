@@ -291,8 +291,8 @@ void Matrix::Constant(float val)
 
 void Matrix::Uniform(float min, float max)
 {
-	mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
-								{ return this->randint(min, max); });
+	mat = Tensor2d::unaryExpr(rows, cols, [&, this]()
+							  { return this->randint(min, max); });
 	allocDevice(mat.data());
 }
 
@@ -786,7 +786,7 @@ void Matrix::Sigmoid()
 {
 	if (!cuda)
 	{
-		mat = 1.0 / (1.0 + (-mat).exp().array());
+		mat = 1.0 / (1.0 + (-mat).array().exp());
 	}
 	else
 	{
@@ -798,8 +798,8 @@ void Matrix::Elu(float alph = 1.0)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::NullaryExpr([&mat, this](float x)
-									{ return alph * (exp(x) - 1.0) ? x < 0.0 : x; });
+		mat = Tensor2d::unaryExpr([&mat, this](float x)
+								  { return alph * (exp(x) - 1.0) ? x < 0.0 : x; });
 	}
 	else
 	{
@@ -811,8 +811,8 @@ void Matrix::Relu(float alph = 0.0)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::NullaryExpr([&mat, this](float x)
-									{ return alph ? x < 0.0 : x; });
+		mat = Tensor2d::unaryExpr([&mat, this](float x)
+								  { return alph ? x < 0.0 : x; });
 	}
 	else
 	{
@@ -824,8 +824,8 @@ void Matrix::Sign(float alph = 0.0)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::NullaryExpr([&mat, this](float x)
-									{ return alph ? x < 0.0 : 1; });
+		mat = Tensor2d::unaryExpr([&mat, this](float x)
+								  { return alph ? x < 0.0 : 1; });
 	}
 	else
 	{
