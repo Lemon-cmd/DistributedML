@@ -11,8 +11,9 @@
 #define BLOCK_SIZE 1024
 
 template <typename T>
-
 using func_t = T (*)(T);
+
+template <typename T>
 using func_alph = T (*)(T, T);
 
 template <typename T>
