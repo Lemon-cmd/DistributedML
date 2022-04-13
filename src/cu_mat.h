@@ -43,8 +43,12 @@ public:
 	void T();			// transpose in-place
 	Matrix transpose(); // transpose and return
 
+	/* Sum */
+	float sum() const;
+
 	/* Power Function */
 	void pow(float val);
+	Matrix power(float val) const;
 
 	/* Matrix Multiplication */
 	void dot(const Matrix &val);			   // matrix mult in-place
@@ -169,7 +173,7 @@ private:
  *
  *
  *
- * -------------- Ostream Functionss --------------
+ * -------------- Non-class Methods --------------
  *
  *
  *
@@ -387,6 +391,20 @@ Matrix Matrix::transpose()
  *
  *  */
 
+float sum() const
+{
+	if (!cuda)
+	{
+		return mat.sum();
+	}
+	else
+	{
+		float h_sum;
+		cublasAssert(cublasSasum(handle, rows * cols, dev_mat, 1, h_sum));
+		return h_sum;
+	}
+}
+
 void Matrix::pow(float val)
 {
 	if (!cuda)
@@ -422,6 +440,24 @@ void Matrix::dot(const Matrix &val)
 		deallocDevMat();
 		dev_mat = new_mat;
 	}
+}
+
+Matrix Matrix::power(float val) const
+{
+	Matrix item(rows, cols);
+
+	if (!cuda)
+	{
+		item.mat = mat.array().pow(val);
+	}
+	else
+	{
+		item.ToDevice();
+		pow_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+		cudaDeviceSynchronize();
+	}
+
+	return item;
 }
 
 Matrix Matrix::operator%(const Matrix &val) const

@@ -30,5 +30,6 @@ int main()
 	std::cout << X << std::endl;
 
 	Y = 2.0 / Y;
+	Y.ToHost();
 	std::cout << Y << std::endl;
 }
