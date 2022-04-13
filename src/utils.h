@@ -115,7 +115,7 @@ void cublas_transpose(const float *A, float *B,
 	cublasAssert(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N,
 							 n, m, &alpha, A,
 							 m, &beta, A,
-							 n, B, n);)
+							 n, B, n));
 }
 
 void cublas_mat_mult(const float *A, const float *B, float *C,

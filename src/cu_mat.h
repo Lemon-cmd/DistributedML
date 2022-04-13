@@ -253,6 +253,7 @@ void Matrix::ToDevice()
 	if (!cuda)
 	{
 		cublasCreate(&handle);
+		allocDevFuncs();
 	}
 
 	cuda = true;
