@@ -126,8 +126,8 @@ private:
 	size_t rows, cols;
 	cublasHandle_t handle;
 
-	func_t<float> cu_elu, cu_exp, cu_sign,
-		cu_tanh, cu_relu, cu_sigmoid;
+	func_t<float> cu_exp, cu_tanh, cu_sigmoid;
+	func_alph<float> cu_elu, cu_sign, cu_relu;
 
 	void deallocDevMat()
 	{
@@ -146,11 +146,12 @@ private:
 
 	void allocDevFuncs()
 	{
-		cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_t<float>));
+		cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>));
+		cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>));
+		cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>));
+
 		cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>));
-		cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_t<float>));
 		cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>));
-		cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_t<float>));
 		cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>));
 	}
 

@@ -11,7 +11,9 @@
 #define BLOCK_SIZE 1024
 
 template <typename T>
-using func_t = T (*)(T, T);
+
+using func_t = T (*)(T);
+using func_alph = T (*)(T, T);
 
 template <typename T>
 __device__ T cudaExp(T x)
@@ -61,13 +63,13 @@ __device__ func_t<T> p_sigmoid = cudaSigmoid<T>;
 
 /* Methods with alpha variable */
 template <typename T>
-__device__ func_t<T> p_elu = cudaELU<T>;
+__device__ func_alph<T> p_elu = cudaELU<T>;
 
 template <typename T>
-__device__ func_t<T> p_relu = cudaReLU<T>;
+__device__ func_alph<T> p_relu = cudaReLU<T>;
 
 template <typename T>
-__device__ func_t<T> p_sign = cudaSign<T>;
+__device__ func_alph<T> p_sign = cudaSign<T>;
 
 template <typename T>
 __global__ void apply_non_alph(T *arr, func_t<T> op, const size_t size)
@@ -82,7 +84,7 @@ __global__ void apply_non_alph(T *arr, func_t<T> op, const size_t size)
 }
 
 template <typename T>
-__global__ void apply_alph(T *arr, func_t<T> op, const T alph, const size_t size)
+__global__ void apply_alph(T *arr, func_alph<T> op, const T alph, const size_t size)
 {
 	const uint stride = blockDim.x * gridDim.x;
 	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
