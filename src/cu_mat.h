@@ -400,7 +400,7 @@ float Matrix::sum() const
 	else
 	{
 		float h_sum;
-		cublasAssert(cublasSasum(handle, rows * cols, dev_mat, 1, h_sum));
+		cublasAssert(cublasSasum(handle, rows * cols, dev_mat, 1, &h_sum));
 		return h_sum;
 	}
 }
