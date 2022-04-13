@@ -13,6 +13,7 @@ public:
 	/* Constructors */
 	Matrix();
 	Matrix(size_t r);
+	Matrix(const Matrix &val);
 	Matrix(size_t r, size_t c);
 
 	Matrix(const std::vector<float> &arr);
@@ -186,6 +187,19 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
 	return stream << matrix.HostData() << std::endl;
 }
 
+Matrix operator/(float val, const Matrix &mat)
+{
+	Matrix item(mat);
+	item.pow(-1.0);
+
+	return item * val;
+}
+
+Matrix operator-(float val, const Matrix &mat)
+{
+	return (mat * -1.0) + val;
+}
+
 /*
  *
  *
@@ -199,6 +213,20 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
 Matrix::Matrix() { dev_mat = nullptr; }
 
 Matrix::Matrix(size_t r) { Matrix(r, 1); }
+
+Matrix::Matrix(const Matrix &val)
+{
+	mat = val.mat;
+	rows = val.rows, cols = val.cols;
+
+	if (val.cuda)
+	{
+		cuda = true;
+		cublasCreate(&handle);
+		cudaMalloc(&dev_mat, bytes());
+		cudaMemcpy(dev_mat, val.dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+	}
+}
 
 Matrix::Matrix(size_t r, size_t c) : rows(r), cols(c)
 {
@@ -396,24 +424,25 @@ void Matrix::dot(const Matrix &val)
 	}
 }
 
-/*
-Matrix Matrix::operator% (const Matrix &val) const
+Matrix Matrix::operator%(const Matrix &val) const
 {
 	assert(cols == val.rows());
 
-	Matrix item (rows, val.cols);
+	Matrix item(rows, val.cols);
 
 	if (!cuda)
 	{
 		item.mat = mat * val.mat;
-	} else {
+	}
+	else
+	{
 		item.ToDevice();
-		cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, handle);
+		cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle);
 		cudaDeviceSynchronize();
 	}
 
 	return item;
-} */
+}
 
 /*
  *

@@ -1,10 +1,7 @@
 #include "modules.h"
 #include "dense.h"
 #include "cu_mat.h"
-
-#include <cuda.h>
-#include <cublas_v2.h>
-#include <cuda_runtime.h>
+#include "clockcycle.h"
 
 int main()
 {
