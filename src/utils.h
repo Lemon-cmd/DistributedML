@@ -37,19 +37,25 @@ __device__ T cudaTanh(T x)
 template <typename T>
 __device__ T cudaReLU(T x, T y = 0.0)
 {
-	return y ? x < 0.0 : x;
+	if (x < 0.0)
+		return y;
+	return x;
 }
 
 template <typename T>
 __device__ T cudaSign(T x, T y = 0.0)
 {
-	return y ? x < 0.0 : 1.0;
+	if (x < 0.0)
+		return y;
+	return 1.0;
 }
 
 template <typename T>
 __device__ T cudaELU(T x, T y = 1.0)
 {
-	return y * (exp(x) - 1.0) ? x < 0.0 : x;
+	if (x < 0.0)
+		return y * (exp(x) - 1.0);
+	return x;
 }
 
 /* Methods with no alpha variable */
