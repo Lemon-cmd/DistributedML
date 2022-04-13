@@ -56,13 +56,13 @@ public:
 	 *
 	 */
 
-	void exp();
-	void tanh();
-	void sigmoid();
-	void softmax();
-	void elu(float alph = 0.0);
-	void sign(float alph = 0.0);
-	void relu(float alph = 0.0);
+	void Exp();
+	void Tanh();
+	void Sigmoid();
+	void Softmax();
+	void Elu(float alph = 0.0);
+	void Sign(float alph = 0.0);
+	void Relu(float alph = 0.0);
 
 	/*
 	 *
@@ -758,11 +758,11 @@ Matrix Matrix::operator/(const Matrix &val) const
  *
  *  */
 
-void Matrix::exp()
+void Matrix::Exp()
 {
 	if (!cuda)
 	{
-		mat = mat.exp();
+		mat = mat.array().exp();
 	}
 	else
 	{
@@ -770,11 +770,11 @@ void Matrix::exp()
 	}
 }
 
-void Matrix::tanh()
+void Matrix::Tanh()
 {
 	if (!cuda)
 	{
-		mat = mat.tanh();
+		mat = mat.array().tanh();
 	}
 	else
 	{
@@ -782,7 +782,7 @@ void Matrix::tanh()
 	}
 }
 
-void Matrix::sigmoid()
+void Matrix::Sigmoid()
 {
 	if (!cuda)
 	{
@@ -794,7 +794,7 @@ void Matrix::sigmoid()
 	}
 }
 
-void Matrix::elu(float alph = 1.0)
+void Matrix::Elu(float alph = 1.0)
 {
 	if (!cuda)
 	{
@@ -807,7 +807,7 @@ void Matrix::elu(float alph = 1.0)
 	}
 }
 
-void Matrix::relu(float alph = 0.0)
+void Matrix::Relu(float alph = 0.0)
 {
 	if (!cuda)
 	{
@@ -820,7 +820,7 @@ void Matrix::relu(float alph = 0.0)
 	}
 }
 
-void Matrix::sign(float alph = 0.0)
+void Matrix::Sign(float alph = 0.0)
 {
 	if (!cuda)
 	{
