@@ -426,7 +426,7 @@ void Matrix::dot(const Matrix &val)
 
 Matrix Matrix::operator%(const Matrix &val) const
 {
-	assert(cols == val.rows());
+	assert(cols == val.rows);
 
 	Matrix item(rows, val.cols);
 
