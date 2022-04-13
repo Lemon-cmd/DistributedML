@@ -828,7 +828,7 @@ void Matrix::Elu(float alph)
 	if (!cuda)
 	{
 		mat = Tensor2d::NullaryExpr([&alph, this](float x)
-									{ if (x < 0.0) return alph * (exp(x) - 1.0); 
+									{ if (x < 0.0) return alph * (expf(x) - 1.0); 
 									  return x; });
 	}
 	else
