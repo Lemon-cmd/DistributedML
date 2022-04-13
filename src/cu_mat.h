@@ -798,8 +798,8 @@ void Matrix::Elu(float alph)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::unaryExpr([&alph, this](float x)
-								  { return alph * (exp(x) - 1.0) ? x < 0.0 : x; });
+		mat = Tensor2d::NullaryExpr([&alph, this](float x)
+									{ return alph * (exp(x) - 1.0) ? x < 0.0 : x; });
 	}
 	else
 	{
@@ -811,8 +811,8 @@ void Matrix::Relu(float alph)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::unaryExpr([&alph, this](float x)
-								  { return alph ? x < 0.0 : x; });
+		mat = Tensor2d::NullaryExpr([&alph, this](float x)
+									{ return alph ? x < 0.0 : x; });
 	}
 	else
 	{
@@ -824,8 +824,8 @@ void Matrix::Sign(float alph)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::unaryExpr([&alph, this](float x)
-								  { return alph ? x < 0.0 : 1; });
+		mat = Tensor2d::NullaryExpr([&alph, this](float x)
+									{ return alph ? x < 0.0 : 1; });
 	}
 	else
 	{
