@@ -391,7 +391,7 @@ Matrix Matrix::transpose()
  *
  *  */
 
-float sum() const
+float Matrix::sum() const
 {
 	if (!cuda)
 	{
