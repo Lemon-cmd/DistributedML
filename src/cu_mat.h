@@ -794,7 +794,7 @@ void Matrix::Sigmoid()
 	}
 }
 
-void Matrix::Elu(float alph = 1.0)
+void Matrix::Elu(float alph)
 {
 	if (!cuda)
 	{
@@ -807,7 +807,7 @@ void Matrix::Elu(float alph = 1.0)
 	}
 }
 
-void Matrix::Relu(float alph = 0.0)
+void Matrix::Relu(float alph)
 {
 	if (!cuda)
 	{
@@ -820,7 +820,7 @@ void Matrix::Relu(float alph = 0.0)
 	}
 }
 
-void Matrix::Sign(float alph = 0.0)
+void Matrix::Sign(float alph)
 {
 	if (!cuda)
 	{
