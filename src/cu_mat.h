@@ -60,7 +60,7 @@ public:
 	void Tanh();
 	void Sigmoid();
 	void Softmax();
-	void Elu(float alph = 0.0);
+	void Elu(float alph = 1.0);
 	void Sign(float alph = 0.0);
 	void Relu(float alph = 0.0);
 
