@@ -316,7 +316,7 @@ void Matrix::Constant(float val)
 	}
 	else
 	{
-		fill_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+		fill_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -399,8 +399,13 @@ float Matrix::sum() const
 	}
 	else
 	{
-		float h_sum = 0;
-		cublasAssert(cublasSasum(handle, rows * cols, dev_mat, 1, &h_sum));
+		float h_sum = 0, *d_ones;
+		Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
+		cudaMalloc(&d_ones, bytes());
+		cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice);
+		cublasAssert(cublasSdot(handle, size(), dev_mat, 1, d_ones, 1, &h_sum));
+
+		cudaFree(d_ones);
 		return h_sum;
 	}
 }
@@ -413,7 +418,7 @@ void Matrix::pow(float val)
 	}
 	else
 	{
-		pow_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+		pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -453,7 +458,7 @@ Matrix Matrix::power(float val) const
 	else
 	{
 		item.ToDevice();
-		pow_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+		pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -521,7 +526,7 @@ void Matrix::operator+=(float val)
 	}
 	else
 	{
-		add_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+		add_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -534,7 +539,7 @@ void Matrix::operator-=(float val)
 	}
 	else
 	{
-		minus_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+		minus_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -547,7 +552,7 @@ void Matrix::operator*=(float val)
 	}
 	else
 	{
-		mult_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+		mult_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -560,7 +565,7 @@ void Matrix::operator/=(float val)
 	}
 	else
 	{
-		div_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+		div_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -579,7 +584,7 @@ Matrix Matrix::operator+(float val) const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		add_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+		add_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -601,7 +606,7 @@ Matrix Matrix::operator-(float val) const
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 
-		minus_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+		minus_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -623,7 +628,7 @@ Matrix Matrix::operator*(float val) const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		mult_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+		mult_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 
 		return item;
@@ -643,7 +648,7 @@ Matrix Matrix::operator/(float val) const
 		item.cuda = true;
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		add_arr_val<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+		add_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -671,7 +676,7 @@ void Matrix::operator+=(const Matrix &val)
 	else
 	{
 		assert(val.cuda);
-		add_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+		add_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -687,7 +692,7 @@ void Matrix::operator-=(const Matrix &val)
 	else
 	{
 		assert(val.cuda);
-		minus_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+		minus_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -703,7 +708,7 @@ void Matrix::operator*=(const Matrix &val)
 	else
 	{
 		assert(val.cuda);
-		mult_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+		mult_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -719,7 +724,7 @@ void Matrix::operator/=(const Matrix &val)
 	else
 	{
 		assert(val.cuda);
-		div_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+		div_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 }
@@ -739,7 +744,7 @@ Matrix Matrix::operator+(const Matrix &val) const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		add_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+		add_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -761,7 +766,7 @@ Matrix Matrix::operator-(const Matrix &val) const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		minus_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+		minus_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -783,7 +788,7 @@ Matrix Matrix::operator*(const Matrix &val) const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		mult_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+		mult_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -806,7 +811,7 @@ Matrix Matrix::operator/(const Matrix &val) const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		div_arr<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+		div_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
 		cudaDeviceSynchronize();
 	}
 
@@ -831,7 +836,7 @@ void Matrix::Exp()
 	}
 	else
 	{
-		apply_non_alph<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
+		apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
 	}
 }
 
@@ -843,7 +848,7 @@ void Matrix::Tanh()
 	}
 	else
 	{
-		apply_non_alph<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_tanh, this->size());
+		apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_tanh, this->size());
 	}
 }
 
@@ -855,7 +860,7 @@ void Matrix::Sigmoid()
 	}
 	else
 	{
-		apply_non_alph<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sigmoid, this->size());
+		apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sigmoid, this->size());
 	}
 }
 
@@ -869,7 +874,7 @@ void Matrix::Elu(float alph)
 	}
 	else
 	{
-		apply_alph<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_elu, alph, this->size());
+		apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_elu, alph, this->size());
 	}
 }
 
@@ -883,7 +888,7 @@ void Matrix::Relu(float alph)
 	}
 	else
 	{
-		apply_alph<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_relu, alph, this->size());
+		apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_relu, alph, this->size());
 	}
 }
 
@@ -897,7 +902,7 @@ void Matrix::Sign(float alph)
 	}
 	else
 	{
-		apply_alph<float><<<(rows * cols - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sign, alph, this->size());
+		apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sign, alph, this->size());
 	}
 }
 
