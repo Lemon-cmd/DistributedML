@@ -29,19 +29,26 @@ make
 ```
 Usage:
 ```
-mpi_network {Input Dim} {# hidden layers} {layer sizes} {Output Dim} {Activation Func} {Epochs} --mode {default = ensemble}
+mpi_network <Input Dim> <# hidden layers> <layer sizes...> <Output Dim> <Epochs> [--optional] 
+  --mode: "ensemble" default
+          "averaged"
+  --activation: "ReLU" default 
+                "sigmoid"
+                "ELU"
+                "sign"
+                "tanh"
+                "identity"
 ```
 
-Run a ReLU network for 10 epochs with:  
+Run a tanh network for 10 epochs with:  
 16 sub networks  
 5 input channels  
 3 hidden layers  
 10, 20, 15 layer sizes  
 2 output channels  
 ```
-mpirun -np 16 mpi_network 5 3 10,20,15 2 ReLU 10
+$ mpirun -np 16 mpi_network 5 3 10 20 15 2 ReLU 10 --activation tanh
 ```
-Activation functions: "sigmoid", "ReLU", "ELU", "sign", "tanh", "identity"
 
 Modes:  
 "ensemble" - create np separate NNs, with aggregation  
