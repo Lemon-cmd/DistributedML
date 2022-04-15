@@ -19,7 +19,7 @@ After reloading
 conda install eigen -y
 ```
 
-Edit line 7 in /src/modules.h to your path
+Edit line 7 in /src/modules.h to your path to the Eigen Install
 
 ## Running Neural Netork
 Compile
@@ -27,8 +27,9 @@ Compile
 cd /mpi/
 make
 ```
+Usage:
 ```
-mpirun -np {Num Processes} mpi_network {Input Dim} {# hidden layers} {Hidden layer sizes} {Output Dim} {Activation Function} {Epochs} --mode {default = ensemble}
+mpi_network {Input Dim} {# hidden layers} {layer sizes} {Output Dim} {Activation Func} {Epochs} --mode {default = ensemble}
 ```
 
 Run a ReLU network for 10 epochs with:  
