@@ -47,7 +47,7 @@ Run a tanh network for 10 epochs with:
 10, 20, 15 layer sizes  
 2 output channels  
 ```
-$ mpirun -np 16 mpi_network 5 3 10 20 15 2 ReLU 10 --activation tanh
+$ mpirun -np 16 mpi_network 5 3 10 20 15 2 10 --activation tanh
 ```
 
 Modes:  
