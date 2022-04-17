@@ -26,7 +26,7 @@ public:
 	virtual float MSELoss(const Matrix &Y, float &accuracy) { return 0; }
 	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) { return 0; }
 
-private:
+protected:
 	float lr_, er_;
 	string afunc_;
 	bool init_ = false, cuda_ = false;
