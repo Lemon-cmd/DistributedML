@@ -19,7 +19,9 @@ using func_alph = T (*)(T, T);
 template <typename T>
 __device__ T cudaLog(T x)
 {
-	return log(x);
+	if (x > 0.0)
+		return log(x);
+	return 0.0;
 }
 
 template <typename T>

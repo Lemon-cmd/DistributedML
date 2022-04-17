@@ -4,6 +4,8 @@
 #include "modules.h"
 #include "cu_mat.h"
 
+#define empty std::placeholders
+
 using std::string;
 typedef Eigen::MatrixXf Tensor2d;
 typedef std::pair<size_t, size_t> Shape;
@@ -88,6 +90,24 @@ protected:
 
 	void SetActivation(std::function<void(Matrix &, Matrix &)> &func)
 	{
+		func = std::bind(&Layer::Identity2d, this, empty::_1, empty::_2);
+
+		if (afunc == "sigmoid")
+		{
+			func = std::bind(&Layer::Sigmoid2d, this, empty::_1, empty::_2);
+		}
+		else if (afunc == "tanh")
+		{
+			func = std::bind(&Layer::Tanh2d, this, empty::_1, empty::_2);
+		}
+		else if (afunc == "relu")
+		{
+			func = std::bind(&Layer::ReLU2d, this, empty::_1, empty::_2);
+		}
+		else if (afunc == "elu")
+		{
+			func = std::bind(&Layer::eLU2d, this, empty::_1, empty::_2);
+		}
 	}
 };
 
