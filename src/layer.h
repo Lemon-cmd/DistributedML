@@ -62,7 +62,8 @@ private:
 	void eLU2d(Matrix &Z, Matrix &dZ)
 	{
 		dZ = Z;
-		Matrix tmp1 = -1.0f * Z;
+		Matrix tmp = Z;
+		tmp *= -1.0;
 
 		dZ.Sign();
 		tmp.Sign();
