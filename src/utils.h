@@ -17,6 +17,12 @@ template <typename T>
 using func_alph = T (*)(T, T);
 
 template <typename T>
+__device__ T cudaLog(T x)
+{
+	return log(x);
+}
+
+template <typename T>
 __device__ T cudaExp(T x)
 {
 	return exp(x);
@@ -59,6 +65,9 @@ __device__ T cudaELU(T x, T y = 1.0)
 }
 
 /* Methods with no alpha variable */
+template <typename T>
+__device__ func_t<T> p_log = cudaLog<T>;
+
 template <typename T>
 __device__ func_t<T> p_exp = cudaExp<T>;
 

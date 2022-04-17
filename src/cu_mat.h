@@ -15,6 +15,7 @@ public:
 	Matrix(size_t r);
 	Matrix(const Matrix &val);
 	Matrix(size_t r, size_t c);
+	Matrix(const Shape &shape);
 
 	Matrix(const std::vector<float> &arr);
 	Matrix(size_t r, size_t c, const std::vector<float> &arr);
@@ -61,6 +62,7 @@ public:
 	 *
 	 */
 
+	void Log();
 	void Exp();
 	void Tanh();
 	void Sigmoid();
@@ -130,7 +132,9 @@ private:
 	size_t rows, cols;
 	cublasHandle_t handle;
 
-	func_t<float> cu_exp, cu_tanh, cu_sigmoid;
+	func_t<float> cu_log, cu_exp, cu_tanh,
+		cu_sigmoid;
+
 	func_alph<float> cu_elu, cu_sign, cu_relu;
 
 	void deallocDevMat()
@@ -154,6 +158,7 @@ private:
 		cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>));
 		cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>));
 
+		cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>));
 		cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>));
 		cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>));
 		cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>));
@@ -216,6 +221,11 @@ Matrix operator-(float val, const Matrix &mat)
 Matrix::Matrix() { dev_mat = nullptr; }
 
 Matrix::Matrix(size_t r) { Matrix(r, 1); }
+
+Matrix::Matrix(const Shape &shape)
+{
+	Matrix(shape.first, shape.second);
+}
 
 Matrix::Matrix(const Matrix &val)
 {
@@ -826,6 +836,18 @@ Matrix Matrix::operator/(const Matrix &val) const
  *
  *
  *  */
+
+void Matrix::Log()
+{
+	if (!cuda)
+	{
+		mat = mat.array().log();
+	}
+	else
+	{
+		apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_log, this->size());
+	}
+}
 
 void Matrix::Exp()
 {

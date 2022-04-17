@@ -14,7 +14,7 @@ class Layer
 public:
 	virtual void ToHost() = 0;
 	virtual void ToDevice() = 0;
-	virtual void init(const Shape &dim) = 0;
+	virtual void init(int in_dim) = 0;
 
 	virtual void update() = 0;
 	virtual void backward() = 0;
@@ -24,13 +24,13 @@ public:
 	virtual const Shape &Input2dShape() const {}
 	virtual const Shape &Output2dShape() const {}
 
-	virtual float MSELoss(Matrix &Y, float &accuracy) {}
-	virtual float CrossEntropyLoss(Matrix &Y, float &accuracy) {}
+	virtual float MSELoss(const Matrix &Y, float &accuracy) {}
+	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) {}
 
 private:
 	float lr_, er_;
 	string afunc_;
-	bool init_ = false;
+	bool init_ = false, cuda_ = false;
 
 	virtual void init_weight() = 0;
 
@@ -39,6 +39,14 @@ private:
 	 * Activation Functions
 	 *
 	 */
+
+	void Identity2d(Matrix &Z, Matrix &dZ)
+	{
+		dZ.setConstant(1.0);
+
+		if (cuda_)
+			dZ.ToDevice();
+	}
 
 	void Tanh2d(Matrix &Z, Matrix &dZ)
 	{
@@ -69,7 +77,7 @@ private:
 	{
 		Z.Relu(alph);
 		dZ = Z;
-		dZ.Sign(0.0);
+		dZ.Sign(alph);
 	}
 
 	void Softmax2d(Matrix &Z, Matrix &dZ)
