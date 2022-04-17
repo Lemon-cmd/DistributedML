@@ -129,8 +129,8 @@ void Dense::set_delta(const Matrix &delta)
 
 float Dense::MSELoss(const Matrix &Y, float &accuracy)
 {
-	dH_ = dH_ * (X - Y);
-	return sqrtf((X - Y).power(2.0).sum());
+	dH_ = dH_ * (H_ - Y);
+	return sqrtf((H_ - Y).power(2.0).sum());
 }
 
 float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy)
