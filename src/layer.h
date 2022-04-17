@@ -22,6 +22,7 @@ public:
 	virtual void forward(const Matrix &X) = 0;
 	virtual void set_delta(const Matrix &delta) = 0;
 
+	virtual const Matrix &get_H() const = 0;
 	virtual const Matrix &get_dJ() const = 0;
 	virtual const Shape &OutShape() const = 0;
 

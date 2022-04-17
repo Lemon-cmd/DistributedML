@@ -3,8 +3,11 @@
 #include "cu_mat.h"
 #include "clockcycle.h"
 
+#define L std::unique_ptr<Layer>
+
 int main()
 {
+	/*
 	Matrix X(2, 1), Y(2, 1);
 
 	X.Uniform(-1, 1);
@@ -18,7 +21,6 @@ int main()
 	// X.Constant(2.0);
 	// Y.Constant(4.0);
 
-	/* ToHost() simply copy from device to host */
 	X.ToHost();
 	Y.ToHost();
 	std::cout << X << '\n'
@@ -32,4 +34,20 @@ int main()
 	Y = 2.0 / Y;
 	Y.ToHost();
 	std::cout << Y << std::endl;
+
+	*/
+
+	Matrix X(2, 1);
+	X.Uniform(-1, 1);
+	X.ToDevice();
+
+	L l0{new Dense(100, "identity")};
+	l0->init(1);
+
+	l0->ToDevice();
+
+	l0->forward(X);
+	l0->ToHost();
+
+	std::cout << l0->Get_H() << std::endl;
 }

@@ -39,7 +39,7 @@ public:
 
 	void ToHost()
 	{
-		if (!cuda_)
+		if (cuda_)
 		{
 			W_.ToHost();
 			B_.ToHost();
@@ -67,6 +67,11 @@ public:
 	const Matrix &get_dJ() const
 	{
 		return dH_;
+	}
+
+	const Matrix &get_H() const
+	{
+		return H_;
 	}
 
 	void forward(const Matrix &X)
