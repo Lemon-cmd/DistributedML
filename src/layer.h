@@ -92,19 +92,19 @@ protected:
 	{
 		func = std::bind(&Layer::Identity2d, this, empty::_1, empty::_2);
 
-		if (afunc == "sigmoid")
+		if (afunc_ == "sigmoid")
 		{
 			func = std::bind(&Layer::Sigmoid2d, this, empty::_1, empty::_2);
 		}
-		else if (afunc == "tanh")
+		else if (afunc_ == "tanh")
 		{
 			func = std::bind(&Layer::Tanh2d, this, empty::_1, empty::_2);
 		}
-		else if (afunc == "relu")
+		else if (afunc_ == "relu")
 		{
 			func = std::bind(&Layer::ReLU2d, this, empty::_1, empty::_2);
 		}
-		else if (afunc == "elu")
+		else if (afunc_ == "elu")
 		{
 			func = std::bind(&Layer::eLU2d, this, empty::_1, empty::_2);
 		}
