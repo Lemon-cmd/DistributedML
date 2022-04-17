@@ -39,22 +39,22 @@ public:
 	{
 		if (!cuda_)
 		{
-			MatToHost(W_);
-			MatToHost(B_);
-			MatToHost(H_);
-			MatToHost(dH_);
-			MatToHost(lgrad_);
+			W_.ToHost();
+			B_.ToHost();
+			H_.ToHost();
+			dH_.ToHost();
+			lgrad_.ToHost();
 		}
 	}
 
 	void ToDevice()
 	{
 		cuda_ = true;
-		MatToDev(W_);
-		MatToDev(B_);
-		MatToDev(H_);
-		MatToDev(dH_);
-		MatToDev(lgrad_);
+		W_.ToDevice();
+		B_.ToDevice();
+		H_.ToDevice();
+		dH_.ToDevice();
+		lgrad_.ToDevice();
 	}
 
 	const Shape &OutShape() const
@@ -121,18 +121,6 @@ private:
 	{
 		B_.Constant(1.0);
 		W_.Uniform(-0.2, 0.2);
-	}
-
-	void MatToDev(Matrix &mat)
-	{
-		if (mat != NULL)
-			mat.ToDevice();
-	}
-
-	void MatToHost(Matrix &mat)
-	{
-		if (mat != NULL)
-			mat.ToHost();
 	}
 };
 
