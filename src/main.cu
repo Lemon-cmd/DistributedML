@@ -41,13 +41,26 @@ int main()
 	X.Uniform(-1, 1);
 	X.ToDevice();
 
-	L l0{new Dense(100, "identity")};
-	l0->init(1);
+	L h1{new Dense(10, "identity")};
+	L h2{new Dense(20)};
 
-	l0->ToDevice();
+	h1->init(5);
+	h2->init(h1->OutShape());
 
-	l0->forward(X);
-	l0->ToHost();
+	std::vetor<L> network;
+	network.resize(10);
 
-	std::cout << l0->Get_H() << std::endl;
+	network[0] = L{new Dense(10)};
+
+	for (unsigned int i = 1; i < 10; i++)
+	{
+		if (i - 1 == 0)
+			network[i - 1]->init(input_size);
+		else
+			network[i - 1]->init(network[i - 2]->OutShape());
+
+		network[i] = L{new Dense(20)};
+	}
+
+	network.back()->init(network[network.size() - 2]->OutShape());
 }
