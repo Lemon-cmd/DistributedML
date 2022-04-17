@@ -85,14 +85,14 @@ private:
 	}
 };
 
-Layer::Dense() : W_(NULL), B_(NULL), H_(NULL), dH_(NULL), lgrad_(NULL)
+Dense::Dense() : W_(NULL), B_(NULL), H_(NULL), dH_(NULL), lgrad_(NULL)
 {
 	vw_ = 0.0f;
 	vb_ = 0.0f;
 	out_dim = std::make_pair(0, 0);
 }
 
-Layer::Dense(uint neurons, const string &afunc = "sigmoid",
+Dense::Dense(uint neurons, const string &afunc = "sigmoid",
 			 float lr = 1e-3, float er = 1e-8)
 {
 	Dense();
@@ -101,14 +101,14 @@ Layer::Dense(uint neurons, const string &afunc = "sigmoid",
 	afunc_ = afunc;
 }
 
-void Layer::forward(const Tensor2d &X)
+void Dense::forward(const Tensor2d &X)
 {
 	H_ = W_.transpose() % X + B_;
 	func_(H_, dH_);
 	I_ = X;
 }
 
-void Layer::update()
+void Dense::update()
 {
 	static Matrix dW;
 	I_.T();
@@ -122,18 +122,18 @@ void Layer::update()
 	lgrad_ = W_.transpose() % dH_;
 }
 
-void Layer::set_delta(const Matrix &delta)
+void Dense::set_delta(const Matrix &delta)
 {
 	dH_ *= delta;
 }
 
-float Layer::MSELoss(const Matrix &Y, float &accuracy)
+float Dense::MSELoss(const Matrix &Y, float &accuracy)
 {
 	dH_ = dH_ * (H_ - Y);
 	return sqrtf((H_ - Y).power(2.0).sum());
 }
 
-float Layer::CrossEntropyLoss(const Matrix &Y, float &accuracy)
+float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy)
 {
 	dH_ = H_ - Y;
 
