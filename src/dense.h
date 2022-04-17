@@ -15,6 +15,7 @@ public:
 		vw_ = 0.0f;
 		vb_ = 0.0f;
 		out_dim = std::make_pair(0, 0);
+		SetActivation(func_);
 	}
 
 	Dense(uint neurons,
