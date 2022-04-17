@@ -23,8 +23,8 @@ public:
 	virtual const Matrix &get_dJ() const = 0;
 	virtual const Shape &OutShape() const = 0;
 
-	virtual float MSELoss(const Matrix &Y, float &accuracy) = 0;
-	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) = 0;
+	virtual float MSELoss(const Matrix &Y, float &accuracy) { return 0; }
+	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) { return 0; }
 
 private:
 	float lr_, er_;

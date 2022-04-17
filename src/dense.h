@@ -60,8 +60,8 @@ public:
 	void forward(const Tensor2d &X);
 	void set_delta(const Matrix &delta);
 
-	float MSELoss(Matrix &Y, float &accuracy);
-	float CrossEntropyLoss(Matrix &Y, float &accuracy);
+	float MSELoss(Matrix &Y, float &accuracy) override;
+	float CrossEntropyLoss(Matrix &Y, float &accuracy) override;
 
 private:
 	Shape out_dim;
@@ -130,13 +130,13 @@ void Dense::set_delta(const Matrix &delta)
 	dH_ *= delta;
 }
 
-float Dense::MSELoss(const Matrix &Y, float &accuracy)
+float Dense::MSELoss(const Matrix &Y, float &accuracy) override
 {
 	dH_ = dH_ * (H_ - Y);
 	return sqrtf((H_ - Y).power(2.0).sum());
 }
 
-float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy)
+float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy) override
 {
 	dH_ = H_ - Y;
 
