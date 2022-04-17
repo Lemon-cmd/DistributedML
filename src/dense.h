@@ -26,7 +26,7 @@ public:
 
 	void ToHost()
 	{
-		if (!cuda)
+		if (!cuda_)
 		{
 			MatToHost(W_);
 			MatToHost(B_);
@@ -38,7 +38,7 @@ public:
 
 	void ToDevice()
 	{
-		cuda = true;
+		cuda_ = true;
 		MatToDev(W_);
 		MatToDev(B_);
 		MatToDev(H_);
