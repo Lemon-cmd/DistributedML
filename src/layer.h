@@ -17,14 +17,14 @@ public:
 	virtual void init(int in_dim) = 0;
 
 	virtual void update() = 0;
-	virtual void forward(const Tensor2d &X) = 0;
-	virtual void set_delta(const Matrix &delta) = 0;
+	virtual void forward(const Tensor2d &X){};
+	virtual void set_delta(const Matrix &delta){};
 
-	virtual const Matrix &get_dJ() const = 0;
-	virtual const Shape &OutShape() const = 0;
+	virtual const Matrix &get_dJ() const {};
+	virtual const Shape &OutShape() const {};
 
-	virtual float MSELoss(const Matrix &Y, float &accuracy) = 0;
-	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) = 0;
+	virtual float MSELoss(const Matrix &Y, float &accuracy){};
+	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy){};
 
 private:
 	float lr_, er_;

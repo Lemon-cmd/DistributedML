@@ -16,7 +16,7 @@ public:
 		  const string &afunc = "sigmoid",
 		  float lr = 1e-3, float er = 1e-8);
 
-	void init(int in_dim)
+	void init(int in_dim) override
 	{
 		W_ = Matrix(in_dim,
 					out_dim.second);
@@ -24,7 +24,7 @@ public:
 		B_ = Matrix(out_dim.second, 1);
 	}
 
-	void ToHost()
+	void ToHost() override
 	{
 		if (!cuda_)
 		{
@@ -36,7 +36,7 @@ public:
 		}
 	}
 
-	void ToDevice()
+	void ToDevice() override
 	{
 		cuda_ = true;
 		MatToDev(W_);
@@ -46,19 +46,22 @@ public:
 		MatToDev(lgrad_);
 	}
 
-	const Shape &OutShape() const { return out_dim; }
+	const Shape &OutShape() const override
+	{
+		return out_dim;
+	}
 
-	const Matrix &get_dJ() const
+	const Matrix &get_dJ() const override
 	{
 		return dH_;
 	}
 
-	void update();
-	void forward(const Tensor2d &X);
-	void set_delta(const Matrix &delta);
+	void update() override;
+	void forward(const Tensor2d &X) override;
+	void set_delta(const Matrix &delta) override;
 
-	float MSELoss(Matrix &Y, float &accuracy);
-	float CrossEntropyLoss(Matrix &Y, float &accuracy);
+	float MSELoss(Matrix &Y, float &accuracy) override;
+	float CrossEntropyLoss(Matrix &Y, float &accuracy) override;
 
 private:
 	Shape out_dim;
@@ -66,7 +69,7 @@ private:
 	Matrix W_, B_, H_, dH_, lgrad_, I_;
 	std::function<void(Matrix &, Matrix &)> func_;
 
-	void init_weight()
+	void init_weight() override
 	{
 		B_.Constant(1.0);
 		W_.Uniform(-0.2, 0.2);
@@ -101,14 +104,14 @@ Dense::Dense(uint neurons, const string &afunc = "sigmoid",
 	afunc_ = afunc;
 }
 
-void Dense::forward(const Tensor2d &X)
+void Dense::forward(const Tensor2d &X) override
 {
 	H_ = W_.transpose() % X + B_;
 	func_(H_, dH_);
 	I_ = X;
 }
 
-void Dense::update()
+void Dense::update() override
 {
 	static Matrix dW;
 	I_.T();
@@ -122,18 +125,18 @@ void Dense::update()
 	lgrad_ = W_.transpose() % dH_;
 }
 
-void Dense::set_delta(const Matrix &delta)
+void Dense::set_delta(const Matrix &delta) override
 {
 	dH_ *= delta;
 }
 
-float Dense::MSELoss(const Matrix &Y, float &accuracy)
+float Dense::MSELoss(const Matrix &Y, float &accuracy) override
 {
 	dH_ = dH_ * (H_ - Y);
 	return sqrtf((H_ - Y).power(2.0).sum());
 }
 
-float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy)
+float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy) override
 {
 	dH_ = H_ - Y;
 
