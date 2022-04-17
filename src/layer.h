@@ -17,12 +17,11 @@ public:
 	virtual void init(int in_dim) = 0;
 
 	virtual void update() = 0;
-	virtual void backward() = 0;
 	virtual void forward(const Tensor2d &X) {}
+	virtual void set_delta(const Matrix &delta) {}
 
 	virtual const Matrix &get_dJ() const {}
-	virtual const Shape &Input2dShape() const {}
-	virtual const Shape &Output2dShape() const {}
+	virtual const Shape &OutShape() const {}
 
 	virtual float MSELoss(const Matrix &Y, float &accuracy) {}
 	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) {}
@@ -42,7 +41,7 @@ private:
 
 	void Identity2d(Matrix &Z, Matrix &dZ)
 	{
-		dZ.setConstant(1.0);
+		dZ.Constant(1.0);
 
 		if (cuda_)
 			dZ.ToDevice();
@@ -60,37 +59,33 @@ private:
 		dZ = Z - Z.power(2.0);
 	}
 
-	void eLU2d(Matrix &Z, Matrix &dZ, float alph = 1.0)
+	void eLU2d(Matrix &Z, Matrix &dZ)
 	{
 		dZ = Z;
 		Matrix tmp1 = -1.0f * Z;
 
 		dZ.Sign();
 		tmp.Sign();
-		Z.Elu(alph);
+		Z.Elu(1.0);
 
 		tmp *= Z;
 		dZ += tmp;
 	}
 
-	void ReLU2d(Matrix &Z, Matrix &dZ, float alph = 0.0)
+	void ReLU2d(Matrix &Z, Matrix &dZ)
 	{
-		Z.Relu(alph);
+		Z.Relu(0.0);
 		dZ = Z;
-		dZ.Sign(alph);
+		dZ.Sign(0.0);
 	}
 
 	void Softmax2d(Matrix &Z, Matrix &dZ)
 	{
-		Z.exp();
+		Z.Exp();
 		Z = Z / Z.sum();
 	}
 
 	void SetActivation(std::function<void(Matrix &, Matrix &)> &func)
-	{
-	}
-
-	void SetActivation(std::function<void(Matrix &, Matrix &, float)> &func)
 	{
 	}
 };
