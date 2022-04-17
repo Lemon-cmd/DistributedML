@@ -142,7 +142,8 @@ float Dense::CrossEntropyLoss(const Matrix &Y, float &accuracy) override
 
 	Matrix J = H_;
 	J.Log();
-	J *= -1.0 * Y;
+	J *= -1.0;
+	J *= Y;
 
 	return J.sum();
 }
