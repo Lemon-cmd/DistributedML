@@ -29,6 +29,8 @@ public:
 
 	void init(int in_dim)
 	{
+		init_ = true;
+
 		W_ = Matrix(in_dim,
 					out_dim.second);
 
