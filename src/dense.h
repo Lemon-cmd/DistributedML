@@ -14,6 +14,7 @@ public:
 	{
 		vw_ = 0.0f;
 		vb_ = 0.0f;
+		afunc_ = "identity";
 		out_dim = std::make_pair(0, 0);
 		SetActivation(func_);
 	}
@@ -27,6 +28,7 @@ public:
 		er_ = er;
 		afunc_ = afunc;
 		out_dim.second = neurons;
+		SetActivation(func_);
 	}
 
 	void init(int in_dim)
