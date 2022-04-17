@@ -47,7 +47,7 @@ int main()
 	h1->init(5);
 	h2->init(h1->OutShape());
 
-	std::vetor<L> network;
+	std::vector<L> network;
 	network.resize(10);
 
 	network[0] = L{new Dense(10)};

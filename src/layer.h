@@ -22,9 +22,12 @@ public:
 	virtual void forward(const Matrix &X) = 0;
 	virtual void set_delta(const Matrix &delta) = 0;
 
+	virtual const Matrix &get_wparam() const = 0;
+	virtual const Matrix &get_bparam() const = 0;
+
 	virtual const Matrix &get_H() const = 0;
 	virtual const Matrix &get_dJ() const = 0;
-	virtual const Shape &OutShape() const = 0;
+	virtual size_t OutShape() const = 0;
 
 	virtual float MSELoss(const Matrix &Y, float &accuracy) { return 0; }
 	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) { return 0; }

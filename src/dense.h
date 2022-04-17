@@ -25,11 +25,13 @@ public:
 		lr_ = lr;
 		er_ = er;
 		afunc_ = afunc;
+		out_dim.second = neurons;
 	}
 
 	void init(int in_dim)
 	{
 		init_ = true;
+		out_dim.first = in_dim;
 
 		W_ = Matrix(in_dim,
 					out_dim.second);
@@ -59,9 +61,9 @@ public:
 		lgrad_.ToDevice();
 	}
 
-	const Shape &OutShape() const
+	size_t OutShape() const
 	{
-		return out_dim;
+		return out_dim.second;
 	}
 
 	const Matrix &get_dJ() const
@@ -72,6 +74,16 @@ public:
 	const Matrix &get_H() const
 	{
 		return H_;
+	}
+
+	const Matrix &get_wparam() const
+	{
+		return W_;
+	}
+
+	const Matrix &get_bparam() const
+	{
+		return B_;
 	}
 
 	void forward(const Matrix &X)
