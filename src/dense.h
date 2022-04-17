@@ -90,7 +90,7 @@ public:
 		lgrad_ = W_.transpose() % dH_;
 	}
 
-	void set_delta(const Matrix &delta);
+	void set_delta(const Matrix &delta)
 	{
 		dH_ *= delta;
 	}
