@@ -57,7 +57,7 @@ public:
 	}
 
 	void update();
-	void forward(const Tensor2d &X);
+	void forward(const Matrix &X);
 	void set_delta(const Matrix &delta);
 
 	float MSELoss(Matrix &Y, float &accuracy) override;
@@ -104,7 +104,7 @@ Dense::Dense(uint neurons, const string &afunc = "sigmoid",
 	afunc_ = afunc;
 }
 
-void Dense::forward(const Tensor2d &X)
+void Dense::forward(const Matrix &X)
 {
 	H_ = W_.transpose() % X + B_;
 	func_(H_, dH_);
