@@ -115,6 +115,7 @@ public:
 		// M x 1 -> 1 x M
 		ones_.T();
 
+		// let ones now be the gradient w.r.t Bias
 		// (1 x M) * (M x dk) -> (1 x dK)
 		ones_.dot(dH_); // sum
 
