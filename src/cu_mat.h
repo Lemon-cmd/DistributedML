@@ -438,7 +438,7 @@ Matrix Matrix::bin() const
 
 	if (!cuda)
 	{
-		item.mat = mat.NullaryExpr([&alph, this](float x)
+		item.mat = mat.NullaryExpr([this](float x)
 								   { if (x < 0.5f) return 0.0f;
 								     return 1.0f; });
 	}
