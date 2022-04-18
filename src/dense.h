@@ -100,7 +100,8 @@ public:
 		std::cout << "Fail?\n";
 
 		// m x d * d x dk + m x 1 * 1 x dk
-		H_ = X % W_ + ones_ % B_;
+		H_ = X % W_;
+		// + ones_ % B_;
 
 		std::cout << "Fail???\n";
 		func_(H_, dH_);
