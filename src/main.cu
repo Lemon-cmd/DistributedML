@@ -7,7 +7,6 @@
 
 int main()
 {
-	/*
 	Matrix X(2, 1), Y(2, 1);
 
 	X.Uniform(-1, 1);
@@ -34,33 +33,4 @@ int main()
 	Y = 2.0 / Y;
 	Y.ToHost();
 	std::cout << Y << std::endl;
-
-	*/
-
-	Matrix X(2, 1);
-	X.Uniform(-1, 1);
-	X.ToDevice();
-
-	L h1{new Dense(10, "identity")};
-	L h2{new Dense(20)};
-
-	h1->init(5);
-	h2->init(h1->OutShape());
-
-	std::vector<L> network;
-	network.resize(10);
-
-	network[0] = L{new Dense(10)};
-
-	for (unsigned int i = 1; i < 10; i++)
-	{
-		if (i - 1 == 0)
-			network[i - 1]->init(input_size);
-		else
-			network[i - 1]->init(network[i - 2]->OutShape());
-
-		network[i] = L{new Dense(20)};
-	}
-
-	network.back()->init(network[network.size() - 2]->OutShape());
 }
