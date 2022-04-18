@@ -4,12 +4,14 @@
 #include <cstdlib>
 #include <string.h>
 
-extern void create_network(int input_size, int num_layers, int* layer_sizes, int output_size, int activation);
+extern void create_network(int input_size, int num_hidden, int* hidden_sizes, int output_size, std::string activation);
 extern void run_forward_prop();
 extern void run_back_prop();
 extern void update_network();
 extern void test_network();
 extern void free_network();
+extern float* get_gradient();
+extern void set_gradient(float* grad);
 
 bool print_usage(){
     std::cerr << "USAGE:\n mpi_network <Input Dim> <# hidden layers> <layer sizes...> <Output Dim> <Epochs> [--optional] \n"
@@ -27,23 +29,23 @@ bool print_usage(){
     return false;
 }
 
-void read_options(int argc, char** argv, int offset, bool& mode, int& activation){
+void read_options(int argc, char** argv, int offset, bool& mode, std::string& activation){
     if(strcmp(argv[5+offset], "--mode") == 0){
     if(strcmp(argv[6+offset], "averaged") == 0){
          mode = 1;
     }
     }
     else if(strcmp(argv[5+offset], "--activation") == 0){
-    if(strcmp(argv[6+offset], "tanh")==0) activation = 1;
-    else if(strcmp(argv[6+offset], "sigmoid") == 0) activation = 2;
-    else if(strcmp(argv[6+offset], "ELU") == 0) activation = 3;
-    else if(strcmp(argv[6+offset], "sign") == 0) activation = 4;
-    else if(strcmp(argv[6+offset],"identity") == 0) activation = 5;
-    else activation = 0;
+    if(strcmp(argv[6+offset], "tanh")==0) activation = "tanh";
+    else if(strcmp(argv[6+offset], "sigmoid") == 0) activation = "sigmoid";
+    else if(strcmp(argv[6+offset], "ELU") == 0) activation = "ELU";
+    else if(strcmp(argv[6+offset], "sign") == 0) activation = "sign";
+    else if(strcmp(argv[6+offset],"identity") == 0) activation = "identity";
+    else activation = "ReLU";
     }
 }
 
-bool read_parameters(int argc, char** argv, int& input_size, int& num_layers, int*& layer_sizes, int& output_size, int& epochs, bool& mode, int& activation){
+bool read_parameters(int argc, char** argv, int& input_size, int& num_layers, int*& layer_sizes, int& output_size, int& epochs, bool& mode, std::string& activation){
     if(argc < 5)
     return print_usage();
     
@@ -86,7 +88,7 @@ int main(int argc, char** argv){
     int output_size;
     int epochs;
     bool mode = 0;
-    int activation = 0;
+    std::string activation = "ReLU";
     int valid = read_parameters(argc, argv, input_size, num_layers, layer_sizes, output_size, epochs, mode, activation);
     if(!valid){ return 1;}
 
@@ -113,8 +115,14 @@ int main(int argc, char** argv){
             run_forward_prop();
             // Calculate gradients with backprop
             run_back_prop();
+            // Retrive gradients;
+            float* grad = get_gradient();
+            float* res_grad;
             // Aggregate gradients in Rank 0
-            // Pass gradients back to NN and update
+            // MPI_Send/Recv
+            // Pass gradients back to NN
+            set_gradient(res_grad);
+            // Update networks with the set gradient
             update_network();
         }
     }
