@@ -166,30 +166,26 @@ public:
 		dH_ = H_ - Y;
 		std::cout << "Fail?\n";
 
-		Matrix J = H_;
-		J.Log();
-		J.ToHost();
-
-		std::cout << "Log:\n"
-				  << J << '\n';
+		J_ = H_;
+		J_.Log();
+		J_.ToHost();
 
 		std::cout << "Fail??\n";
-		J *= (-1.0);
-		J.ToHost();
+		J_ *= (-1.0);
+		J_.ToHost();
 
-		std::cout << J << '\n';
 		std::cout << "Fail???\n";
-		J *= Y;
+		J_ *= Y;
 
 		std::cout << "Fail????\n";
 
-		return J.sum();
+		return J_.sum();
 	}
 
 private:
 	Shape out_dim;
 	float vw_, vb_;
-	Matrix W_, B_, H_, dH_, lgrad_, I_, ones_;
+	Matrix W_, B_, H_, dH_, lgrad_, I_, ones_, J_;
 	std::function<void(Matrix &, Matrix &)> func_;
 
 	void init_weight()
