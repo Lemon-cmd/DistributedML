@@ -131,8 +131,8 @@ public:
 		// lgrad : m x d
 		lgrad_ = dH_ % W_.transpose();
 
-		dW *= lr_ / sqrtf(vw_ + er_);
-		ones *= lr_ / sqrtf(vb_ + er_);
+		dW *= (lr_ / sqrtf(vw_ + er_));
+		ones *= (lr_ / sqrtf(vb_ + er_));
 
 		// update parameters
 		W_ -= dW;
