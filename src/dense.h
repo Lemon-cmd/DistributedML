@@ -165,19 +165,15 @@ public:
 		std::cout << "Fail\n";
 		dH_ = H_ - Y;
 		std::cout << "Fail?\n";
+
 		Matrix J = H_;
 		J.Log();
-		J.ToHost();
-		std::cout << "Log:\n"
-				  << J << '\n';
 
 		std::cout << "Fail??\n";
-		J *= (-1.0);
-		J.ToHost();
+		J = J * (-1.0);
 
-		std::cout << J << '\n';
 		std::cout << "Fail???\n";
-		J *= Y;
+		J = J * Y;
 
 		std::cout << "Fail????\n";
 
