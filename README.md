@@ -38,6 +38,7 @@ mpi_network <Input Dim> <# hidden layers> <layer sizes...> <Output Dim> <Epochs>
                 "sign"
                 "tanh"
                 "identity"
+                "softmax"
 ```
 
 Run a tanh network for 10 epochs with:  
