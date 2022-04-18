@@ -36,6 +36,9 @@ public:
 	void ToHost();
 	void ToDevice();
 
+	// set points > 0.5 to 1 else 0;
+	Matrix bin() const;
+
 	/* Filling Methods */
 	void Random();
 	void Constant(float val);
@@ -427,6 +430,29 @@ float Matrix::sum() const
 		cudaFree(d_ones);
 		return h_sum;
 	}
+}
+
+Matrix Matrix::bin() const
+{
+	Matrix item(rows, cols);
+
+	if (!cuda)
+	{
+		item.mat = mat.NullaryExpr([&alph, this](float x)
+								   { if (x < 0.5f) return 0.0f;
+								     return 1.0f; });
+	}
+	else
+	{
+		item.cuda = true;
+		cublasCreate(&item.handle);
+		cudaMalloc(&item.dev_mat, bytes());
+		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+		bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, this->size());
+		cudaDeviceSynchronize();
+	}
+
+	return item;
 }
 
 void Matrix::pow(float val)
@@ -899,8 +925,8 @@ void Matrix::Elu(float alph)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::NullaryExpr([&alph, this](float x)
-									{ if (x < 0.0f) return alph * (exp(x) - 1.0f); 
+		mat = mat.NullaryExpr([&alph, this](float x)
+							  { if (x < 0.0f) return alph * (exp(x) - 1.0f); 
 									  return x; });
 	}
 	else
@@ -913,8 +939,8 @@ void Matrix::Relu(float alph)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::NullaryExpr([&alph, this](float x)
-									{ if (x < 0.0) return alph;
+		mat = mat.NullaryExpr([&alph, this](float x)
+							  { if (x < 0.0) return alph;
 									  return x; });
 	}
 	else
@@ -927,8 +953,8 @@ void Matrix::Sign(float alph)
 {
 	if (!cuda)
 	{
-		mat = Tensor2d::NullaryExpr([&alph, this](float x)
-									{ if (x < 0.0f) return alph;
+		mat = mat.NullaryExpr([&alph, this](float x)
+							  { if (x < 0.0f) return alph;
 									  return 1.0f; });
 	}
 	else

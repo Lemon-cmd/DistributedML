@@ -7,7 +7,7 @@
 
 int main()
 {
-	Matrix X(2, 1), Y(2, 1);
+	Matrix X(20, 1), Y(5, 1);
 
 	X.Uniform(-1, 1);
 	Y.Uniform(-1, 1);
@@ -32,7 +32,9 @@ int main()
 	std::cout << X << '\n';
 
 	X.Exp();
-	Matrix ones(2, 2);
+
+	// dk x dk
+	Matrix ones(5, 5);
 	ones.Constant(1.0);
 	ones.ToDevice();
 
