@@ -43,4 +43,8 @@ int main()
 	X.ToHost();
 
 	std::cout << X << '\n';
+
+	X = X.bin();
+	X.ToHost();
+	std::cout << X << '\n';
 }
