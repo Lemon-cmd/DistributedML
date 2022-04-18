@@ -111,7 +111,11 @@ public:
 	float *DevData() const { return dev_mat; }
 
 	/* Return Eigen::MatrixXf */
-	float *HostData() const { return mat.data(); }
+	float *HostData() const
+	{
+		float *host_data = mat.data();
+		return host_data;
+	}
 
 	/* Return size of matrix */
 	size_t size() const { return rows * cols; }
