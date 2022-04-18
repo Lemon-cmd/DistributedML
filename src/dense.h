@@ -122,7 +122,7 @@ public:
 		ones_ /= (float)dH_.shape().first;
 
 		// adam parameters
-		vw_ = 0.1 * vw_ + 0.9 * dW.sum();
+		vw_ = 0.1 * vw_ + 0.9 * (dW * dW).sum();
 		vb_ = 0.1 * vb_ + 0.9 * (ones_ * ones_).sum();
 
 		// W : dk x d
