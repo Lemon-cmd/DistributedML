@@ -131,8 +131,8 @@ public:
 		// lgrad : m x d
 		lgrad_ = dH_ % W_.transpose();
 
-		W -= lr_ / sqrtf(vw_ + er_) * dW;
-		B -= lr_ / sqrtf(vb_ + er_) * ones_;
+		W_ -= lr_ / sqrtf(vw_ + er_) * dW;
+		B_ -= lr_ / sqrtf(vb_ + er_) * ones_;
 	}
 
 	void set_dJ(const Matrix &dJ)
