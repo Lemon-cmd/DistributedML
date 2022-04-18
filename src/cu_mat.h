@@ -542,9 +542,9 @@ Matrix Matrix::operator%(const Matrix &val) const
 
 void Matrix::operator=(const Matrix &val)
 {
-	mat = val.mat;
 	rows = val.rows;
 	cols = val.cols;
+	Matrix(rows, cols);
 	deallocDevMat();
 
 	if (val.cuda)
