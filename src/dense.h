@@ -179,7 +179,7 @@ public:
 
 		std::cout << "Fail????\n";
 
-		return J_.sum();
+		return 0.0;
 	}
 
 private:
