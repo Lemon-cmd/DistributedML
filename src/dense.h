@@ -71,14 +71,19 @@ public:
 		return out_dim.second;
 	}
 
-	const Matrix &get_dJ() const
+	Matrix get_dJ() const
 	{
 		return dH_;
 	}
 
-	const Matrix &get_H() const
+	Matrix get_H() const
 	{
 		return H_;
+	}
+
+	Matrix get_delta() const
+	{
+		return lgrad_;
 	}
 
 	const Matrix &get_wparam() const
@@ -154,11 +159,6 @@ public:
 	void set_delta(const Matrix &delta)
 	{
 		dH_ *= delta;
-	}
-
-	const Matrix &get_delta() const
-	{
-		return lgrad_;
 	}
 
 	float MSELoss(const Matrix &Y, float &accuracy) override
