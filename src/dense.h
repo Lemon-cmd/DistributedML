@@ -145,7 +145,7 @@ public:
 		dH_ *= delta;
 	}
 
-	const Matrix &get_delta()
+	const Matrix &get_delta() const
 	{
 		return lgrad_;
 	}
