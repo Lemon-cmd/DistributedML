@@ -126,6 +126,10 @@ protected:
 		{
 			func = std::bind(&Layer::eLU2d, this, empty::_1, empty::_2);
 		}
+		else if (afunc_ == "softmax")
+		{
+			func = std::bind(&Layer::Softmax2d, this, empty::_1, empty::_2);
+		}
 	}
 };
 
