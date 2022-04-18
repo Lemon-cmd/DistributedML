@@ -182,7 +182,6 @@ private:
 	{
 		B_.Constant(1.0);
 		W_.Uniform(-0.2, 0.2);
-		ones_.Constant(1.0);
 	}
 };
 
