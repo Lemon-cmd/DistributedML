@@ -61,9 +61,6 @@ public:
 		cuda_ = true;
 		W_.ToDevice();
 		B_.ToDevice();
-		H_.ToDevice();
-		dH_.ToDevice();
-		lgrad_.ToDevice();
 	}
 
 	size_t OutShape() const
