@@ -20,13 +20,19 @@ public:
 
 	virtual void update() = 0;
 	virtual void forward(const Matrix &X) = 0;
+
+	virtual void set_dJ(const Matrix &dJ) = 0;
 	virtual void set_delta(const Matrix &delta) = 0;
 
-	virtual const Matrix &get_wparam() const = 0;
+	virtual const Matrix &
+	get_wparam() const = 0;
 	virtual const Matrix &get_bparam() const = 0;
 
 	virtual const Matrix &get_H() const = 0;
 	virtual const Matrix &get_dJ() const = 0;
+
+	virtual const Matrix &get_delta() const = 0;
+
 	virtual size_t OutShape() const = 0;
 
 	virtual float MSELoss(const Matrix &Y, float &accuracy) { return 0; }
@@ -88,8 +94,16 @@ protected:
 
 	void Softmax2d(Matrix &Z, Matrix &dZ)
 	{
+		Matrix ones_cols(Z.cols, Z.cols);
+		ones_cols.Constant(1.0);
+
+		if (cuda_)
+			ones_cols.ToDevice();
+
 		Z.Exp();
-		Z = Z / Z.sum();
+
+		Matrix denom = Z % ones_cols;
+		Z /= denom;
 	}
 
 	void SetActivation(std::function<void(Matrix &, Matrix &)> &func)

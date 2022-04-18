@@ -21,7 +21,7 @@ __device__ T cudaLog(T x)
 {
 	if (x > 0.0)
 		return log(x);
-	return 0.0;
+	return 1e-8;
 }
 
 template <typename T>

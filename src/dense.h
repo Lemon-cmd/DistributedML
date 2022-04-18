@@ -31,15 +31,18 @@ public:
 		SetActivation(func_);
 	}
 
-	void init(int in_dim)
+	void init(const Shape &in_dim)
 	{
 		init_ = true;
-		out_dim.first = in_dim;
+		out_dim.first = in_dim.first;
 
-		W_ = Matrix(in_dim,
+		W_ = Matrix(in_dim.second,
 					out_dim.second);
 
 		B_ = Matrix(out_dim.second, 1);
+		ones_ = Matrix(1, in_dim.first);
+
+		init_weight();
 	}
 
 	void ToHost()
@@ -62,6 +65,7 @@ public:
 		H_.ToDevice();
 		dH_.ToDevice();
 		lgrad_.ToDevice();
+		ones_.ToDevice();
 	}
 
 	size_t OutShape() const
@@ -91,7 +95,7 @@ public:
 
 	void forward(const Matrix &X)
 	{
-		H_ = W_.transpose() % X + B_;
+		H_ = X % W_.transpose() + B_ % ones_;
 		func_(H_, dH_);
 		I_ = X;
 	}
@@ -104,15 +108,34 @@ public:
 		dW.dot(I_);
 		dW.pow(2.0);
 
+		// dH_ : M x dk -> dK x M
+		dH_.T();
+		// ( dK x M ) * (M x 1) -> (dK x 1)
+		dH_.dot(ones_);
+
 		// adam parameters
 		vw_ = 0.1 * vw_ + 0.9 * dW.sum();
 		vb_ = 0.1 * vb_ + 0.9 * (dH_ * dH_).sum();
+
 		lgrad_ = W_.transpose() % dH_;
+
+		W -= lr_ / sqrtf(vw_ + er_) * dW;
+		B -= lr_ / sqrtf(vb_ + er_) * dH_;
+	}
+
+	void set_dJ(const Matrix &dJ)
+	{
+		dH_ = dJ;
 	}
 
 	void set_delta(const Matrix &delta)
 	{
 		dH_ *= delta;
+	}
+
+	const Matrix &get_delta()
+	{
+		return lgrad_;
 	}
 
 	float MSELoss(const Matrix &Y, float &accuracy) override
@@ -136,13 +159,14 @@ public:
 private:
 	Shape out_dim;
 	float vw_, vb_;
-	Matrix W_, B_, H_, dH_, lgrad_, I_;
+	Matrix W_, B_, H_, dH_, lgrad_, I_, ones_;
 	std::function<void(Matrix &, Matrix &)> func_;
 
 	void init_weight()
 	{
 		B_.Constant(1.0);
 		W_.Uniform(-0.2, 0.2);
+		ones_.Constant(1.0);
 	}
 };
 

@@ -18,6 +18,7 @@ public:
 	Matrix(const Shape &shape);
 
 	Matrix(const std::vector<float> &arr);
+	Matrix(size_t r, size_t c, const float *arr);
 	Matrix(size_t r, size_t c, const std::vector<float> &arr);
 
 	/* Destructor */
@@ -110,7 +111,7 @@ public:
 	float *DevData() const { return dev_mat; }
 
 	/* Return Eigen::MatrixXf */
-	Tensor2d HostData() const { return mat; }
+	float *HostData() const { return mat.data(); }
 
 	/* Return size of matrix */
 	size_t size() const { return rows * cols; }
@@ -252,6 +253,12 @@ Matrix::Matrix(const std::vector<float> &arr)
 	Matrix();
 	rows = 1, cols = arr.size();
 	mat = Eigen::Map<const Tensor2d>(arr.data(), rows, cols);
+}
+
+Matrix::Matrix(size_t r, size_t c, const float *arr)
+{
+	rows = r, cols = c;
+	mat = Eigen::Map<const Tensor2d>(arr, rows, cols);
 }
 
 Matrix::Matrix(size_t r, size_t c, const std::vector<float> &arr)
