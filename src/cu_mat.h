@@ -436,7 +436,7 @@ Matrix Matrix::bin() const
 {
 	Matrix item(rows, cols);
 
-	float threshold = this->sum() / size();
+	float threshold = this->sum() / size() + 0.05f;
 
 	if (!cuda)
 	{
