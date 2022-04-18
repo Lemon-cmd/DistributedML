@@ -93,7 +93,7 @@ protected:
 
 	void Softmax2d(Matrix &Z, Matrix &dZ)
 	{
-		Matrix ones_cols(Z.cols, Z.cols);
+		Matrix ones_cols(Z.shape().second, Z.shape().second);
 		ones_cols.Constant(1.0);
 
 		if (cuda_)
