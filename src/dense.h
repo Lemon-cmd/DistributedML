@@ -96,7 +96,8 @@ public:
 		ones_ = Matrix(X.shape().first, 1);
 		ones_.ToDevice();
 
-		H_ = X % W_.transpose() + ones_ % B_;
+		// m x d * d x dk + m x 1 * 1 x dk
+		H_ = X % W_ + ones_ % B_;
 		func_(H_, dH_);
 		I_ = X;
 	}
@@ -107,7 +108,7 @@ public:
 		// d x m
 		I_.T();
 
-		// d x m * m x dk
+		// d x m * m x dk -> d x dk
 		dW = I_ % dH_;
 		dW.pow(2.0);
 
