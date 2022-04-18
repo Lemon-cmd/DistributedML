@@ -550,6 +550,7 @@ void Matrix::operator=(const Matrix &val)
 	if (val.cuda)
 	{
 		cuda = true;
+		cublasCreate(&handle);
 		cudaMalloc(&dev_mat, bytes());
 		cudaMemcpy(dev_mat, val.dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 	}
