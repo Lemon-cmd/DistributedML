@@ -68,17 +68,17 @@ public:
 		return out_dim.second;
 	}
 
-	Matrix get_dJ() const
+	const Matrix &get_dJ() const
 	{
 		return dH_;
 	}
 
-	Matrix get_H() const
+	const Matrix &get_H() const
 	{
 		return H_;
 	}
 
-	Matrix get_delta() const
+	const Matrix &get_delta() const
 	{
 		return lgrad_;
 	}
@@ -95,20 +95,15 @@ public:
 
 	void forward(const Matrix &X)
 	{
-		std::cout << "Fail\n";
 		ones_ = Matrix(X.shape().first, 1);
 		ones_.ToDevice();
-
-		std::cout << "Fail?\n";
 
 		// m x d * d x dk + m x 1 * 1 x dk
 		H_ = X % W_ + ones_ % B_;
 
 		dH_ = H_;
 
-		std::cout << "Fail???\n";
 		func_(H_, dH_);
-		std::cout << "Fail????\n";
 		I_ = X;
 	}
 
@@ -167,12 +162,16 @@ public:
 
 	float CrossEntropyLoss(const Matrix &Y, float &accuracy) override
 	{
+		std::cout << "Fail\n";
 		dH_ = H_ - Y;
-
+		std::cout << "Fail?\n";
 		Matrix J = H_;
 		J.Log();
+		std::cout << "Fail??\n";
 		J *= -1.0;
+		std::cout << "Fail???\n";
 		J *= Y;
+		std::cout << "Fail????\n";
 
 		return J.sum();
 	}
