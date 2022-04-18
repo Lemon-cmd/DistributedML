@@ -104,9 +104,11 @@ public:
 	void update()
 	{
 		static Matrix dW;
+		// d x m
 		I_.T();
-		dW = dH_;
-		dW.dot(I_);
+
+		// d x m * m x dk
+		dW = I_ % dH_;
 		dW.pow(2.0);
 
 		// M x 1 -> 1 x M
