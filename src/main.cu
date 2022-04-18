@@ -26,11 +26,19 @@ int main()
 			  << '\n'
 			  << Y << std::endl;
 
-	X = 1.0 - X;
-	X.ToHost();
-	std::cout << X << std::endl;
+	X.dot(Y.transpose());
 
-	Y = 2.0 / Y;
-	Y.ToHost();
-	std::cout << Y << std::endl;
+	X.ToHost();
+	std::cout << X << '\n';
+
+	X.Exp();
+	Matrix ones(2, 2);
+	ones.Constant(1.0);
+	ones.ToDevice();
+
+	ones = X % ones;
+	X /= ones;
+	X.ToHost();
+
+	std::cout << X << '\n';
 }
