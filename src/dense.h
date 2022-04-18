@@ -31,16 +31,15 @@ public:
 		SetActivation(func_);
 	}
 
-	void init(const Shape &in_dim)
+	void init(int in_dim)
 	{
 		init_ = true;
-		out_dim.first = in_dim.first;
+		out_dim.first = in_dim;
 
-		W_ = Matrix(in_dim.second,
+		W_ = Matrix(in_dim,
 					out_dim.second);
 
-		B_ = Matrix(out_dim.second, 1);
-		ones_ = Matrix(1, in_dim.first);
+		B_ = Matrix(1, out_dim.second);
 
 		init_weight();
 	}
@@ -65,7 +64,6 @@ public:
 		H_.ToDevice();
 		dH_.ToDevice();
 		lgrad_.ToDevice();
-		ones_.ToDevice();
 	}
 
 	size_t OutShape() const
@@ -95,7 +93,10 @@ public:
 
 	void forward(const Matrix &X)
 	{
-		H_ = X % W_.transpose() + B_ % ones_;
+		ones_ = Matrix(X.shape().first, 1);
+		ones_.ToDevice();
+
+		H_ = X % W_.transpose() + ones_ % B_;
 		func_(H_, dH_);
 		I_ = X;
 	}
@@ -108,19 +109,26 @@ public:
 		dW.dot(I_);
 		dW.pow(2.0);
 
-		// dH_ : M x dk -> dK x M
-		dH_.T();
-		// ( dK x M ) * (M x 1) -> (dK x 1)
-		dH_.dot(ones_);
+		// M x 1 -> 1 x M
+		ones_.T();
+
+		// (1 x M) * (M x dk) -> (1 x dK)
+		ones_.dot(dH_); // sum
+
+		// average
+		ones_ /= (float)dH_.shape().first;
 
 		// adam parameters
 		vw_ = 0.1 * vw_ + 0.9 * dW.sum();
-		vb_ = 0.1 * vb_ + 0.9 * (dH_ * dH_).sum();
+		vb_ = 0.1 * vb_ + 0.9 * (ones_ * ones_).sum();
 
-		lgrad_ = W_.transpose() % dH_;
+		// W : dk x d
+		// dH : m x dk
+		// lgrad : m x d
+		lgrad_ = dH_ % W_.transpose();
 
 		W -= lr_ / sqrtf(vw_ + er_) * dW;
-		B -= lr_ / sqrtf(vb_ + er_) * dH_;
+		B -= lr_ / sqrtf(vb_ + er_) * ones_;
 	}
 
 	void set_dJ(const Matrix &dJ)

@@ -24,8 +24,7 @@ public:
 	virtual void set_dJ(const Matrix &dJ) = 0;
 	virtual void set_delta(const Matrix &delta) = 0;
 
-	virtual const Matrix &
-	get_wparam() const = 0;
+	virtual const Matrix &get_wparam() const = 0;
 	virtual const Matrix &get_bparam() const = 0;
 
 	virtual const Matrix &get_H() const = 0;
