@@ -93,12 +93,18 @@ public:
 
 	void forward(const Matrix &X)
 	{
+		std::cout << "Fail\n";
 		ones_ = Matrix(X.shape().first, 1);
 		ones_.ToDevice();
 
+		std::cout << "Fail?\n";
+
 		// m x d * d x dk + m x 1 * 1 x dk
 		H_ = X % W_ + ones_ % B_;
+
+		std::cout << "Fail???\n";
 		func_(H_, dH_);
+		std::cout << "Fail????\n";
 		I_ = X;
 	}
 

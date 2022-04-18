@@ -153,14 +153,14 @@ void cublas_mat_mult(const float *A, const float *B, float *C,
 }
 
 template <typename T>
-__global__ void bin_arr(T *arr, const size_t size)
+__global__ void bin_arr(T *arr, const float threshold, const size_t size)
 {
 	const uint stride = blockDim.x * gridDim.x;
 	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
 
 	for (uint j = idx; j < size; j += stride)
 	{
-		if (arr[j] >= 0.5)
+		if (arr[j] >= threshold)
 			arr[j] = 1.0;
 		else
 			arr[j] = 0.0;

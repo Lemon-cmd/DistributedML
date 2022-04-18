@@ -436,6 +436,8 @@ Matrix Matrix::bin() const
 {
 	Matrix item(rows, cols);
 
+	float threshold = this->sum() / size();
+
 	if (!cuda)
 	{
 		item.mat = mat.NullaryExpr([this](float x)
@@ -448,7 +450,7 @@ Matrix Matrix::bin() const
 		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-		bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, this->size());
+		bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, threshold, this->size());
 		cudaDeviceSynchronize();
 	}
 
