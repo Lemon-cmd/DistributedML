@@ -111,10 +111,9 @@ public:
 	float *DevData() const { return dev_mat; }
 
 	/* Return Eigen::MatrixXf */
-	float *HostData() const
+	const Tensor2d &HostData() const
 	{
-		float *host_data = mat.data();
-		return host_data;
+		return mat;
 	}
 
 	/* Return size of matrix */
