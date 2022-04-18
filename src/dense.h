@@ -68,27 +68,27 @@ public:
 		return out_dim.second;
 	}
 
-	const Matrix &get_dJ() const
+	Matrix get_dJ() const
 	{
 		return dH_;
 	}
 
-	const Matrix &get_H() const
+	Matrix get_H() const
 	{
 		return H_;
 	}
 
-	const Matrix &get_delta() const
+	Matrix get_delta() const
 	{
 		return lgrad_;
 	}
 
-	const Matrix &get_wparam() const
+	Matrix get_wparam() const
 	{
 		return W_;
 	}
 
-	const Matrix &get_bparam() const
+	Matrix get_bparam() const
 	{
 		return B_;
 	}
