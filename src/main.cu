@@ -6,6 +6,9 @@ int main()
 {
 
 	Matrix X(20, 1), Y(5, 1);
+	X.Random();
+	Y.Random();
+
 	X.ToHost();
 	Y.ToHost();
 
@@ -43,4 +46,6 @@ int main()
 	float loss = network.back().MSELoss(Y, accuracy);
 	std::cout << "L: " << loss << std::endl;
 	*/
+
+	return 0;
 }

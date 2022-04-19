@@ -150,7 +150,7 @@ private:
 		cudaAssert(cudaFree(dev_mat));
 		cudaAssert(cudaMalloc(&dev_mat, bytes()));
 		cudaAssert(cudaMemset(dev_mat, 0, bytes()));
-		cudaAssert(cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice));
+		cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
 	}
 
 	void ToDevice()
@@ -161,7 +161,7 @@ private:
 			allocDevFuncs();
 			cudaAssert(cudaMalloc(&dev_mat, bytes()));
 			cublasAssert(cublasCreate(&handle));
-			cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice));
+			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
 		}
 		else
 		{
