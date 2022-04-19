@@ -60,7 +60,7 @@ public:
 
 		std::cout << "Fail????\n";
 
-		return J.sum();
+		return J_.sum();
 	}
 
 private:
