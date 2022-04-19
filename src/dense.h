@@ -155,6 +155,8 @@ void Dense::forward(const Matrix &X)
 
 	func_(H_, dH_);
 	I_ = X;
+
+	std::cout << "Done\n";
 }
 
 void Dense::update()

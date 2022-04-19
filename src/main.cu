@@ -69,7 +69,6 @@ int main()
 		network[j].ToDevice();
 	}
 
-	std::cout << "Forwarding...\n";
 	network[0].forward(X);
 	for (uint j = 1; j < network.size(); j++)
 	{
