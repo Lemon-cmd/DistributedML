@@ -232,6 +232,7 @@ Matrix::Matrix(const Shape &shape)
 Matrix::Matrix(const Matrix &val)
 {
 	mat = val.mat;
+	cublasCreate(&handle);
 	rows = val.rows, cols = val.cols;
 
 	if (val.cuda)
