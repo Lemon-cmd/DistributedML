@@ -36,9 +36,6 @@ int main()
 	X.Random();
 	Y.Random();
 
-	X.ToDevice();
-	Y.ToDevice();
-
 	X.ToHost();
 	Y.ToHost();
 
