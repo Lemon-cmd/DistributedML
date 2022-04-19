@@ -2,10 +2,37 @@
 #include "cu_mat.h"
 #include "clockcycle.h"
 
+int check_cuda(const int rank)
+{
+	int cudaDeviceCount;
+	cudaError_t cE = cudaGetDeviceCount(&cudaDeviceCount);
+
+	if (cE != cudaSuccess)
+	{
+		printf(" Unable to determine cuda device count, error is %d, count is %d\n",
+			   cE, cudaDeviceCount);
+		exit(-1);
+	}
+
+	cE = cudaSetDevice(rank % cudaDeviceCount);
+
+	if (cE != cudaSuccess)
+	{
+		printf(" Unable to have rank %d set to cuda device %d, error is %d \n",
+			   rank, (rank % cudaDeviceCount), cE);
+
+		exit(-1);
+	}
+
+	return cudaDeviceCount;
+}
+
 int main()
 {
+	cudaSetDevice(0);
 
 	Matrix X(20, 1), Y(5, 1);
+
 	X.Random();
 	Y.Random();
 
