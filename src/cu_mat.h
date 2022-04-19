@@ -36,7 +36,6 @@ public:
 
     /* GPU/CPU utils */
     void ToHost();
-    void ToDevice();
 
     /* Filling Methods */
     void Random();
@@ -106,6 +105,22 @@ private:
         cudaAssert(cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>)));
         cudaAssert(cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>)));
     }
+
+    void ToDevice()
+    {
+        if (!cuda)
+        {
+            cuda = true;
+            allocDevFuncs();
+            cublasAssert(cublasCreate(&handle));
+            cudaAssert(cudaMalloc((void **)&dev_mat, bytes()));
+            cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
+        }
+        else
+        {
+            allocDevice(host_mat.data());
+        }
+    }
 };
 
 std::ostream &operator<<(std::ostream &stream,
@@ -133,6 +148,7 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
 Matrix::Matrix()
 {
     host_mat = Tensor2d::Zero(rows, cols);
+    ToDevice();
 }
 
 Matrix::Matrix(size_t r) : rows(r)
@@ -198,22 +214,6 @@ void Matrix::ToHost()
     host_mat = Tensor2d::Zero(rows, cols);
     cudaMemcpy(host_mat.data(), dev_mat, bytes(),
                cudaMemcpyDeviceToHost);
-}
-
-void Matrix::ToDevice()
-{
-    if (!cuda)
-    {
-        cuda = true;
-        allocDevFuncs();
-        cublasAssert(cublasCreate(&handle));
-        cudaAssert(cudaMalloc((void **)&dev_mat, bytes()));
-        cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
-    }
-    else
-    {
-        allocDevice(host_mat.data());
-    }
 }
 
 /*
