@@ -406,8 +406,8 @@ void Matrix::bin_()
 {
 	ToHost();
 	host_mat = host_mat.NullaryExpr([this](float x)
-									{ if (x < 0.5) return 0.f;
-									  return 1.f; });
+									{ if (x < 0.5f) return 0.0f;
+								     return 1.0f; });
 	ToDevice();
 }
 
