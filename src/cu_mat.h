@@ -147,7 +147,7 @@ private:
 
 	void allocDevice(const float *val, bool dev_transfer = false)
 	{
-		cudaFree(dev_mat);
+		cudaAssert(cudaFree(dev_mat));
 		cudaAssert(cudaMallocManaged(&dev_mat, bytes()));
 		cudaAssert(cudaMemset(dev_mat, 0, bytes()));
 
@@ -364,7 +364,7 @@ void Matrix::T_()
 	cublas_transpose(dev_mat, new_mat, rows, cols, handle);
 	cudaDeviceSynchronize();
 
-	cudaFree(dev_mat);
+	cudaAssert(cudaFree(dev_mat));
 	dev_mat = new_mat;
 
 	std::swap(rows, cols);
@@ -399,7 +399,7 @@ float Matrix::sum() const
 
 	cublasAssert(cublasSdot(handle, size(), dev_mat, 1, d_ones, 1, &mat_sum));
 
-	cudaFree(d_ones);
+	cudaAssert(cudaFree(d_ones));
 	return mat_sum;
 }
 
@@ -418,7 +418,7 @@ Matrix Matrix::bin() const
 
 	float threshold = this->sum() / size() + 0.07f;
 
-	cudaFree(item.dev_mat);
+	cudaAssert(cudaFree(item.dev_mat));
 	cudaAssert(cudaMallocManaged(&item.dev_mat, bytes()));
 	cudaAssert(cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice));
 
@@ -438,7 +438,7 @@ Matrix Matrix::pow(float val) const
 {
 	Matrix item(rows, cols);
 
-	cudaFree(item.dev_mat);
+	cudaAssert(cudaFree(item.dev_mat));
 	cudaAssert(cudaMallocManaged(&item.dev_mat, bytes()));
 	cudaAssert(cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice));
 	pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
@@ -460,7 +460,7 @@ void Matrix::dot_(const Matrix &val)
 	cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
 	cudaDeviceSynchronize();
 
-	cudaFree(dev_mat);
+	cudaAssert(cudaFree(dev_mat));
 	dev_mat = new_mat;
 }
 
