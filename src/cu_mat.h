@@ -95,14 +95,14 @@ private:
         if (type == 0)
         {
             cudaAssert(cudaMalloc(&dev_mat, bytes()));
-            cudaAssert(cudaMemcpy(dev_mat, val, cudaMemcpyHostToDevice));
+            cudaAssert(cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice));
         }
 
         // dev to dev
         else if (type == 1)
         {
             cudaAssert(cudaMalloc(&dev_mat, bytes()));
-            cudaAssert(cudaMemcpy(dev_mat, val, cudaMemcpyDeviceToDevice));
+            cudaAssert(cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyDeviceToDevice));
         }
         else
         {
@@ -117,7 +117,7 @@ private:
             cuda = true;
             cublasAssert(cublasCreate(&handle));
             cudaAssert(cudaMalloc(&dev_mat, bytes()));
-            cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), cudaMemcpyHostToDevice));
+            cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice));
         }
 
         else
@@ -218,8 +218,9 @@ Matrix::Matrix(size_t r, size_t c, const std::vector<float> &arr)
 
 void Matrix::ToHost()
 {
-    mat = Tensor2d::Zero(rows, cols);
-    cudaMemcpy(mat.data(), dev_mat, bytes(),
+    host_mat = Tensor2d::Zero(rows, cols);
+
+    cudaMemcpy(host_mat.data(), dev_mat, bytes(),
                cudaMemcpyDeviceToHost);
 }
 
