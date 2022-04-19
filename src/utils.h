@@ -113,6 +113,16 @@ __global__ void apply_alph(T *arr, func_alph<T> op, const T alph, const size_t s
 	}
 }
 
+#define cudaAssert(x)                                                              \
+	{                                                                              \
+		cudaError_t err = (x);                                                     \
+		if (err != cudaSuccess)                                                    \
+		{                                                                          \
+			Log("Line %d: cudaCheckError: %s", __LINE__, cudaGetErrorString(err)); \
+			assert(0);                                                             \
+		}                                                                          \
+	}
+
 #define cublasAssert(ans)                      \
 	{                                          \
 		blasAssert((ans), __FILE__, __LINE__); \

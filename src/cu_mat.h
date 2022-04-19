@@ -30,7 +30,7 @@ public:
 	/* Destructor */
 	~Matrix()
 	{
-		cudaFree(dev_mat);
+		cudaAssert(cudaFree(dev_mat));
 		cublasAssert(cublasDestroy(handle));
 	}
 
@@ -147,10 +147,10 @@ private:
 
 	void allocDevice(const float *val)
 	{
-		cudaFree(dev_mat);
-		cudaMalloc(&dev_mat, bytes());
-		cudaMemset(dev_mat, 0, bytes());
-		cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
+		cudaAssert(cudaFree(dev_mat));
+		cudaAssert(cudaMalloc(&dev_mat, bytes()));
+		cudaAssert(cudaMemset(dev_mat, 0, bytes()));
+		cudaAssert(cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice));
 	}
 
 	void ToDevice()
@@ -159,9 +159,9 @@ private:
 		{
 			cuda = true;
 			allocDevFuncs();
-			cudaMalloc(&dev_mat, bytes());
+			cudaAssert(cudaMalloc(&dev_mat, bytes()));
 			cublasAssert(cublasCreate(&handle));
-			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
+			cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice));
 		}
 		else
 		{
@@ -171,14 +171,14 @@ private:
 
 	void allocDevFuncs()
 	{
-		cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>));
-		cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>));
-		cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>)));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>)));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>)));
 
-		cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>));
-		cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>));
-		cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>));
-		cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>)));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>)));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>)));
+		cudaAssert(cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>)));
 	}
 
 	float randint(float min, float max) const
@@ -309,8 +309,8 @@ void Matrix::ToHost()
 
 	host_mat = Tensor2d::Zero(rows, cols);
 
-	cudaMemcpy(host_mat.data(), dev_mat, bytes(),
-			   cudaMemcpyDeviceToHost);
+	cudaAssert(cudaMemcpy(host_mat.data(), dev_mat, bytes(),
+						  cudaMemcpyDeviceToHost));
 }
 
 /*
@@ -332,14 +332,14 @@ void Matrix::Random()
 void Matrix::Constant(float val)
 {
 	fill_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
-	cudaDeviceSynchronize();
+	cudaAssert(cudaDeviceSynchronize());
 }
 
 void Matrix::Uniform(float min, float max)
 {
 	host_mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
 									 { return this->randint(min, max); });
-	allocDevice(host_mat.data());
+	cudaAssert(allocDevice(host_mat.data()));
 }
 
 /*
@@ -355,13 +355,13 @@ void Matrix::T_()
 {
 
 	float *new_mat;
-	cudaMalloc(&new_mat, bytes());
-	cudaMemset(new_mat, 0.0, bytes());
+	cudaAssert(cudaMalloc(&new_mat, bytes()));
+	cudaAssert(cudaMemset(new_mat, 0.0, bytes()));
 
 	cublas_transpose(dev_mat, new_mat, rows, cols, handle);
 	cudaDeviceSynchronize();
 
-	cudaFree(dev_mat);
+	cudaAssert(cudaFree(dev_mat));
 	dev_mat = new_mat;
 
 	std::swap(rows, cols);
@@ -391,12 +391,12 @@ float Matrix::sum() const
 	float mat_sum = 0, *d_ones;
 	Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
 
-	cudaMalloc(&d_ones, bytes());
-	cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice);
+	cudaAssert(cudaMalloc(&d_ones, bytes()));
+	cudaAssert(cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice));
 
 	cublasAssert(cublasSdot(handle, size(), dev_mat, 1, d_ones, 1, &mat_sum));
 
-	cudaFree(d_ones);
+	cudaAssert(cudaFree(d_ones));
 	return mat_sum;
 }
 
@@ -415,12 +415,12 @@ Matrix Matrix::bin() const
 
 	float threshold = this->sum() / size() + 0.07f;
 
-	cudaFree(item.dev_mat);
-	cudaMalloc(&item.dev_mat, bytes());
-	cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+	cudaAssert(cudaFree(item.dev_mat));
+	cudaAssert(cudaMalloc(&item.dev_mat, bytes()));
+	cudaAssert(cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice));
 
 	bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, threshold, this->size());
-	cudaDeviceSynchronize();
+	cudaAssert(cudaDeviceSynchronize());
 
 	return item;
 }
@@ -428,18 +428,18 @@ Matrix Matrix::bin() const
 void Matrix::pow_(float val)
 {
 	pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
-	cudaDeviceSynchronize();
+	cudaAssert(cudaDeviceSynchronize());
 }
 
 Matrix Matrix::pow(float val) const
 {
 	Matrix item(rows, cols);
 
-	cudaFree(item.dev_mat);
-	cudaMalloc(&item.dev_mat, bytes());
-	cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+	cudaAssert(cudaFree(item.dev_mat));
+	cudaAssert(cudaMalloc(&item.dev_mat, bytes()));
+	cudaAssert(cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice));
 	pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
-	cudaDeviceSynchronize();
+	cudaAssert(cudaDeviceSynchronize());
 
 	return item;
 }
@@ -454,10 +454,10 @@ void Matrix::dot_(const Matrix &val)
 	cudaMalloc(&new_mat, bytes());
 	cudaMemset(new_mat, 0, bytes());
 
-	cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
+	cudaAssert(cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle));
 	cudaDeviceSynchronize();
 
-	cudaFree(dev_mat);
+	cudaAssert(cudaFree(dev_mat));
 	dev_mat = new_mat;
 }
 
@@ -467,7 +467,7 @@ Matrix Matrix::dot(const Matrix &val) const
 
 	Matrix item(rows, val.cols);
 
-	cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle);
+	cudaAssert(cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle));
 	cudaDeviceSynchronize();
 
 	return item;
