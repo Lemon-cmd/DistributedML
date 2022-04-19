@@ -37,9 +37,6 @@ public:
 	/* GPU/CPU utils */
 	void ToHost();
 
-	// set points > 0.5 to 1 else 0;
-	Matrix bin() const;
-
 	/* Filling Methods */
 	void Random();
 	void Constant(float val);
@@ -49,16 +46,19 @@ public:
 	void T_();	// transpose in-place
 	Matrix T(); // transpose and return
 
+	// set points > 0.5 to 1 else 0;
+	Matrix bin() const;
+
 	/* Sum */
 	float sum() const;
 
 	/* Power Function */
-	void pow(float val);
-	Matrix power(float val) const;
+	void pow_(float val);
+	Matrix pow(float val) const;
 
 	/* Matrix Multiplication */
-	void dot(const Matrix &val);			   // matrix mult in-place
-	Matrix operator%(const Matrix &val) const; // matrix mult and return
+	void dot_(const Matrix &val);		 // matrix mult in-place
+	Matrix dot(const Matrix &val) const; // matrix mult and return
 
 	/*
 	 *
@@ -67,13 +67,14 @@ public:
 	 *
 	 */
 
+	/*
 	void Log();
 	void Exp();
 	void Tanh();
 	void Sigmoid();
 	void Elu(float alph = 1.0);
 	void Sign(float alph = 0.0);
-	void Relu(float alph = 0.0);
+	void Relu(float alph = 0.0); */
 
 	/*
 	 *
@@ -82,6 +83,7 @@ public:
 	 * Ex: X += 1.0; X += Y;
 	 *
 	 * */
+	/*
 	void operator*=(float val);
 	void operator+=(float val);
 	void operator-=(float val);
@@ -91,7 +93,7 @@ public:
 	void operator*=(const Matrix &val);
 	void operator+=(const Matrix &val);
 	void operator-=(const Matrix &val);
-	void operator/=(const Matrix &val);
+	void operator/=(const Matrix &val);*/
 
 	/*
 	 *
@@ -100,7 +102,7 @@ public:
 	 * Ex: X = X + X; X = 1 + X;
 	 *
 	 * */
-
+	/*
 	Matrix operator-(float val) const;
 	Matrix operator+(float val) const;
 	Matrix operator/(float val) const;
@@ -109,16 +111,13 @@ public:
 	Matrix operator+(const Matrix &val) const;
 	Matrix operator-(const Matrix &val) const;
 	Matrix operator/(const Matrix &val) const;
-	Matrix operator*(const Matrix &val) const;
+	Matrix operator*(const Matrix &val) const; */
 
 	/* Return array on the gpu */
 	float *DevData() const { return dev_mat; }
 
 	/* Return Eigen::MatrixXf */
-	const Tensor2d &HostData() const
-	{
-		return host_mat;
-	}
+	const Tensor2d &HostData() const { return host_mat; }
 
 	/* Return size of matrix */
 	size_t size() const { return rows * cols; }
@@ -311,6 +310,166 @@ void Matrix::ToHost()
 
 	cudaMemcpy(host_mat.data(), dev_mat, bytes(),
 			   cudaMemcpyDeviceToHost);
+}
+
+/*
+ *
+ *
+ *
+ * -------------- Initialize Methods --------------
+ *
+ *
+ *
+ *  */
+
+void Matrix::Random()
+{
+	host_mat = Tensor2d::Random(rows, cols);
+	allocDevice(host_mat.data());
+}
+
+void Matrix::Constant(float val)
+{
+	fill_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+	cudaDeviceSynchronize();
+}
+
+void Matrix::Uniform(float min, float max)
+{
+	host_mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
+									 { return this->randint(min, max); });
+	allocDevice(host_mat.data());
+}
+
+/*
+ *
+ *
+ * -------------- Transpose Methods --------------
+ *
+ *
+ *  */
+
+/* Transpose In Place */
+void Matrix::T_()
+{
+
+	float *new_mat;
+	cudaMalloc(&new_mat, bytes());
+	cudaMemset(new_mat, 0.0, bytes());
+
+	cublas_transpose(dev_mat, new_mat, rows, cols, handle);
+	cudaDeviceSynchronize();
+
+	cudaFree(dev_mat);
+	dev_mat = new_mat;
+
+	std::swap(rows, cols);
+}
+
+/* Transpose */
+Matrix Matrix::T()
+{
+	Matrix item(cols, rows);
+
+	cublas_transpose(dev_mat, item.dev_mat, rows, cols, item.handle);
+	cudaDeviceSynchronize();
+
+	return item;
+}
+
+/*
+ *
+ *
+ * -------------- Basic Math Methods --------------
+ *
+ *
+ *  */
+
+float Matrix::sum() const
+{
+	float mat_sum = 0, *d_ones;
+	Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
+
+	cudaMalloc(&d_ones, bytes());
+	cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice);
+
+	cublasAssert(cublasSdot(handle, size(), dev_mat, 1, d_ones, 1, &mat_sum));
+
+	cudaFree(d_ones);
+	return mat_sum;
+}
+
+void Matrix::bin_()
+{
+	ToHost();
+	host_mat = host_mat.NullaryExpr([this](float x)
+									{ if (x < 0.5) return 0.f;
+									  return 1.f; });
+	ToDevice();
+}
+
+Matrix Matrix::bin() const
+{
+	Matrix item(rows, cols);
+
+	float threshold = this->sum() / size() + 0.07f;
+
+	cudaFree(item.dev_mat);
+	cudaMalloc(&item.dev_mat, bytes());
+	cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+
+	bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, threshold, this->size());
+	cudaDeviceSynchronize();
+
+	return item;
+}
+
+void Matrix::pow_(float val)
+{
+	pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+	cudaDeviceSynchronize();
+}
+
+Matrix::pow(float val) const
+{
+	Matrix item(rows, cols);
+
+	cudaFree(item.dev_mat);
+	cudaMalloc(&item.dev_mat, bytes());
+	cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
+	pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+	cudaDeviceSynchronize();
+
+	return item;
+}
+
+void Matrix::dot_(const Matrix &val)
+{
+	assert(cols == val.rows);
+
+	cols = val.cols;
+
+	float *new_mat;
+	cudaMalloc(&new_mat, bytes());
+	cudaMemset(new_mat, 0, bytes());
+
+	cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
+	cudaDeviceSynchronize();
+
+	cudaFree(dev_mat);
+	dev_mat = new_mat;
+}
+
+Matrix Matrix::dot(const Matrix &val) const
+{
+	assert(cols == val.rows);
+
+	Matrix item(rows, val.cols);
+
+	cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle);
+	cudaDeviceSynchronize();
+
+	return item;
 }
 
 #endif

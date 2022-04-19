@@ -5,8 +5,6 @@
 int main()
 {
 
-	friend Matrix;
-
 	Matrix X(20, 1), Y(5, 1);
 
 	std::cout << X << '\n';
