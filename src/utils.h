@@ -113,15 +113,19 @@ __global__ void apply_alph(T *arr, func_alph<T> op, const T alph, const size_t s
 	}
 }
 
-#define cudaAssert(x)                                                              \
-	{                                                                              \
-		cudaError_t err = (x);                                                     \
-		if (err != cudaSuccess)                                                    \
-		{                                                                          \
-			Log("Line %d: cudaCheckError: %s", __LINE__, cudaGetErrorString(err)); \
-			assert(0);                                                             \
-		}                                                                          \
+#define cudaAssert(ans)                       \
+	{                                         \
+		gpuAssert((ans), __FILE__, __LINE__); \
 	}
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
+{
+	if (code != cudaSuccess)
+	{
+		fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+		if (abort)
+			exit(code);
+	}
+}
 
 #define cublasAssert(ans)                      \
 	{                                          \
