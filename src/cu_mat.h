@@ -145,7 +145,7 @@ private:
 
 	func_alph<float> cu_elu, cu_sign, cu_relu;
 
-	void allocDevice(const float *val, bool dev_transfer = false)
+	void allocDevice(float *val, bool dev_transfer = false)
 	{
 		cudaAssert(cudaFree(dev_mat));
 
