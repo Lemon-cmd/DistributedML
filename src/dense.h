@@ -150,10 +150,16 @@ void Dense::forward(const Matrix &X)
 
 	// m x d * d x dk + m x 1 * 1 x dk
 	H_ = X % W_ + ones_ % B_;
+	std::cout << "Got H\n";
 
 	dH_ = H_;
 
+	std::cout << "Init dH\n";
+
 	func_(H_, dH_);
+
+	std::cout << "Activate\n";
+
 	I_ = X;
 
 	std::cout << "Done\n";
