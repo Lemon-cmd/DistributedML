@@ -238,7 +238,6 @@ Matrix::Matrix(const Matrix &val)
 	{
 		cuda = true;
 		cudaFree(dev_mat);
-		cublasCreate(&handle);
 		cudaMalloc(&dev_mat, bytes());
 		cudaMemcpy(dev_mat, val.dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 	}
@@ -385,7 +384,6 @@ Matrix Matrix::transpose()
 	else
 	{
 		item.cuda = true;
-		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemset(item.dev_mat, 0.0, bytes());
 
@@ -438,7 +436,6 @@ Matrix Matrix::bin() const
 	else
 	{
 		item.cuda = true;
-		cublasCreate(&item.handle);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, threshold, this->size());
