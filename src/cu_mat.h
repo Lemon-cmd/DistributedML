@@ -144,17 +144,9 @@ private:
 
 	func_alph<float> cu_elu, cu_sign, cu_relu;
 
-	void deallocDevMat()
-	{
-		if (dev_mat != nullptr)
-		{
-			cudaFree(dev_mat);
-		}
-	}
-
 	void allocDevice(const float *val)
 	{
-		deallocDevMat();
+		cudaFree(dev_mat);
 		cudaMalloc(&dev_mat, bytes());
 		cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
 	}
@@ -225,7 +217,10 @@ Matrix operator-(float val, const Matrix &mat)
  *
  *  */
 
-Matrix::Matrix() { dev_mat = nullptr; }
+Matrix::Matrix()
+{
+	cudaMalloc(&dev_mat, sizeof(float));
+}
 
 Matrix::Matrix(size_t r) { Matrix(r, 1); }
 
@@ -242,6 +237,7 @@ Matrix::Matrix(const Matrix &val)
 	if (val.cuda)
 	{
 		cuda = true;
+		cudaFree(dev_mat);
 		cublasCreate(&handle);
 		cudaMalloc(&dev_mat, bytes());
 		cudaMemcpy(dev_mat, val.dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -263,6 +259,7 @@ Matrix::Matrix(const std::vector<float> &arr)
 
 Matrix::Matrix(size_t r, size_t c, const float *arr)
 {
+	Matrix();
 	rows = r, cols = c;
 	mat = Eigen::Map<const Tensor2d>(arr, rows, cols);
 }
@@ -288,7 +285,7 @@ void Matrix::cpu()
 {
 	ToHost();
 	cuda = false;
-	deallocDevMat();
+	cudaFree(dev_mat);
 }
 
 void Matrix::ToHost()
