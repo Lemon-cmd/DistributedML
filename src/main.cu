@@ -6,6 +6,8 @@ int main()
 {
 
 	Matrix X(20, 1), Y(5, 1);
+	X.ToHost();
+	Y.ToHost();
 
 	std::cout << X << '\n';
 	std::cout << Y << '\n';

@@ -245,6 +245,7 @@ Matrix::Matrix()
 	rows = !(rows > 0) ? 1 : rows;
 	cols = !(cols > 0) ? 1 : cols;
 
+	std::cout << rows << ' ' << cols << '\n';
 	host_mat = Tensor2d::Zero(rows, cols);
 	ToDevice();
 }
