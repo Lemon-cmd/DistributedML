@@ -30,7 +30,7 @@ public:
 	/* Destructor */
 	~Matrix()
 	{
-		cudaFree(dev_mat);
+		cudaAssert(cudaFree(dev_mat));
 		cublasAssert(cublasDestroy(handle));
 	}
 
@@ -145,12 +145,16 @@ private:
 
 	func_alph<float> cu_elu, cu_sign, cu_relu;
 
-	void allocDevice(const float *val)
+	void allocDevice(const float *val, bool dev_transfer = false)
 	{
 		cudaFree(dev_mat);
 		cudaAssert(cudaMalloc(&dev_mat, bytes()));
 		cudaAssert(cudaMemset(dev_mat, 0, bytes()));
-		cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
+
+		if (!dev_transfer)
+			cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
+		else
+			cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyDeviceToDevice);
 	}
 
 	void ToDevice()
@@ -159,8 +163,8 @@ private:
 		{
 			cuda = true;
 			allocDevFuncs();
-			cudaAssert(cudaMalloc(&dev_mat, bytes()));
 			cublasAssert(cublasCreate(&handle));
+			cudaAssert(cudaMalloc(&dev_mat, bytes()));
 			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
 		}
 		else
@@ -272,7 +276,7 @@ Matrix::Matrix(const Matrix &val)
 
 	Matrix();
 	host_mat = val.host_mat;
-	allocDevice(val.dev_mat);
+	allocDevice(val.dev_mat, true);
 }
 
 Matrix::Matrix(size_t r, size_t c,
