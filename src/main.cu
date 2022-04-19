@@ -67,7 +67,8 @@ int main()
 
 	for (uint j = 1; j < network.size(); j++)
 	{
-		network[j] = L{new Dense(100)};
+		network[j] = L{new Dense(100 - j)};
+		std::cout << network[j - 1]->OutShape() << '\n';
 		network[j]->init(network[j - 1]->OutShape());
 		network[j]->ToDevice();
 	}
