@@ -31,7 +31,7 @@ public:
 	~Matrix()
 	{
 		cudaFree(dev_mat);
-		cublasDestroy(handle);
+		cublasAssert(cublasDestroy(handle));
 	}
 
 	/* GPU/CPU utils */
@@ -149,6 +149,7 @@ private:
 	{
 		cudaFree(dev_mat);
 		cudaMalloc(&dev_mat, bytes());
+		cudaMemset(dev_mat, 0, bytes());
 		cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
 	}
 
@@ -158,8 +159,8 @@ private:
 		{
 			cuda = true;
 			allocDevFuncs();
-			cublasCreate(&handle);
 			cudaMalloc(&dev_mat, bytes());
+			cublasAssert(cublasCreate(&handle));
 			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
 		}
 		else
