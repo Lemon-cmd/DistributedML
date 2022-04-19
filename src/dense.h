@@ -85,8 +85,8 @@ Dense::Dense()
 }
 
 Dense::Dense(uint neurons,
-			 const string &afunc = "sigmoid",
-			 float lr = 1e-3, float er = 1e-8)
+			 const string &afunc,
+			 float lr, float er)
 {
 	Dense();
 	lr_ = lr;
