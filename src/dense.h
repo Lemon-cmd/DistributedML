@@ -131,6 +131,11 @@ void Dense::forward(const Matrix &X)
 	ones_ = Matrix(X.shape().first, 1);
 	ones_.ToDevice();
 
+	std::cout << X.shape() << '\n'
+			  << ones_.shape() << '\n'
+			  << W_.shape() << '\n'
+			  << B_.shape() << '\n';
+
 	// m x d * d x dk + m x 1 * 1 x dk
 	H_ = X % W_ + ones_ % B_;
 
