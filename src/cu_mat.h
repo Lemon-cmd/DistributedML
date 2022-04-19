@@ -49,7 +49,7 @@ public:
 	Matrix transpose(); // transpose and return
 
 	/* Sum */
-	float sum() const;
+	float sum();
 
 	/* Power Function */
 	void pow(float val);
