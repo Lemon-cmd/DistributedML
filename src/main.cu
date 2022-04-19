@@ -5,7 +5,6 @@
 
 int main()
 {
-	/*
 	Matrix X(20, 1), Y(5, 1);
 
 	X.Uniform(-1, 1);
@@ -46,8 +45,8 @@ int main()
 	X = X.bin();
 	X.ToHost();
 	std::cout << X << '\n';
-	*/
 
+	/*
 	float accuracy = 0.0;
 
 	Matrix X(100, 5), Y(100, 10);
@@ -77,4 +76,5 @@ int main()
 
 	float loss = network.back().MSELoss(Y, accuracy);
 	std::cout << "L: " << loss << std::endl;
+	*/
 }
