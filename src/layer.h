@@ -27,8 +27,8 @@ public:
 	virtual const Matrix &Get_wparam() const = 0;
 	virtual const Matrix &Get_bparam() const = 0;
 
-	virtual const Matrix &Get_H() const = 0;
-	virtual const Matrix &Get_dJ() const = 0;
+	virtual Matrix Get_H() const = 0;
+	virtual Matrix Get_dJ() const = 0;
 
 	virtual const Matrix &Get_delta() const = 0;
 

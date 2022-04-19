@@ -24,8 +24,8 @@ public:
 	const Matrix &Get_bparam() const { return B_; }
 	const Matrix &Get_wparam() const { return W_; }
 
-	const Matrix &Get_H() const { return H_; }
-	const Matrix &Get_dJ() const { return dH_; }
+	Matrix Get_H() const { return H_; }
+	Matrix Get_dJ() const { return dH_; }
 	const Matrix &Get_delta() const { return lgrad_; }
 
 	void update();
