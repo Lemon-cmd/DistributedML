@@ -339,7 +339,7 @@ void Matrix::Uniform(float min, float max)
 {
 	host_mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
 									 { return this->randint(min, max); });
-	cudaAssert(allocDevice(host_mat.data()));
+	allocDevice(host_mat.data());
 }
 
 /*
@@ -454,7 +454,7 @@ void Matrix::dot_(const Matrix &val)
 	cudaMalloc(&new_mat, bytes());
 	cudaMemset(new_mat, 0, bytes());
 
-	cudaAssert(cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle));
+	cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
 	cudaDeviceSynchronize();
 
 	cudaAssert(cudaFree(dev_mat));
@@ -467,7 +467,7 @@ Matrix Matrix::dot(const Matrix &val) const
 
 	Matrix item(rows, val.cols);
 
-	cudaAssert(cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle));
+	cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle);
 	cudaDeviceSynchronize();
 
 	return item;
