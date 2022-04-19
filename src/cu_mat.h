@@ -33,7 +33,7 @@ public:
     /* Return Eigen::MatrixXf */
     const Tensor2d &HostData() const
     {
-        return mat;
+        return host_mat;
     }
 
     /* Return size of matrix */
@@ -102,7 +102,7 @@ Matrix::Matrix()
 {
     host_mat = Tensor2d::Zero(rows, cols);
 
-    if (dev_mat == nullptr_t)
+    if (dev_mat == nullptr)
         std::cout << "Yes!!\n";
 }
 
