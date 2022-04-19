@@ -61,13 +61,13 @@ int main()
 	std::vector<L>
 		network(3);
 
-	network[0] = L{new Dense(100)};
+	network[0] = L{new Dense(100, "identity")};
 	network[0]->init(5);
 	network[0]->ToDevice();
 
 	for (uint j = 1; j < network.size(); j++)
 	{
-		network[j] = L{new Dense(100 - j)};
+		network[j] = L{new Dense(100 - j, "identity")};
 		std::cout << network[j - 1]->OutShape() << '\n';
 		network[j]->init(network[j - 1]->OutShape());
 		network[j]->ToDevice();

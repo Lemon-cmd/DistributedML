@@ -16,7 +16,7 @@ class Layer
 public:
 	virtual void ToHost() = 0;
 	virtual void ToDevice() = 0;
-	virtual void init(int in_dim) = 0;
+	virtual void init(size_t in_dim) = 0;
 
 	virtual void update() = 0;
 	virtual void forward(const Matrix &X) = 0;

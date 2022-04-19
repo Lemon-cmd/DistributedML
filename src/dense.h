@@ -12,11 +12,11 @@ class Dense : public Layer
 public:
 	Dense();
 
-	Dense(uint neurons,
+	Dense(size_t neurons,
 		  const string &afunc = "sigmoid",
 		  float lr = 1e-3, float er = 1e-8);
 
-	void init(int in_dim);
+	void init(size_t in_dim);
 
 	void ToHost();
 	void ToDevice();
@@ -84,7 +84,7 @@ Dense::Dense()
 	SetActivation(func_);
 }
 
-Dense::Dense(uint neurons,
+Dense::Dense(size_t neurons,
 			 const string &afunc,
 			 float lr, float er)
 {
@@ -96,8 +96,10 @@ Dense::Dense(uint neurons,
 	SetActivation(func_);
 }
 
-void Dense::init(int in_dim)
+void Dense::init(size_t in_dim)
 {
+	assert(init_);
+
 	init_ = true;
 	W_ = Matrix(in_dim,
 				out_dim_);
