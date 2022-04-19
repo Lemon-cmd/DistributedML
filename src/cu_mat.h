@@ -107,6 +107,7 @@ private:
         }
         else
         {
+            std::cout << "????\n";
             allocDevice(host_mat.data());
         }
     }
