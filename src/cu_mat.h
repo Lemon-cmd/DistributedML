@@ -470,10 +470,11 @@ void Matrix::dot(const Matrix &val)
 	}
 	else
 	{
-		Tensor2d new_mat = Tensor2d::Zero(rows, val.rows);
-		cudaMalloc(&new_mat.data(), bytes());
+		float *new_mat;
+		cudaMalloc(new_mat.data(), bytes());
+		cudaMemset(new_data, 0, bytes());
 
-		cublas_mat_mult(dev_mat, val.dev_mat, new_mat.data(), rows, val.rows, val.cols, handle);
+		cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
 		cudaDeviceSynchronize();
 
 		cudaFree(dev_mat);
