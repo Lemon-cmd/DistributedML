@@ -135,9 +135,9 @@ private:
 	bool cuda = false;
 
 	Tensor2d mat;
-	float *dev_mat;
 	size_t rows, cols;
 	cublasHandle_t handle;
+	float *dev_mat, mat_sum;
 
 	func_t<float> cu_log, cu_exp, cu_tanh,
 		cu_sigmoid;
@@ -413,7 +413,7 @@ Matrix Matrix::transpose()
  *
  *  */
 
-float Matrix::sum() const
+float Matrix::sum()
 {
 	if (!cuda)
 	{
@@ -421,14 +421,14 @@ float Matrix::sum() const
 	}
 	else
 	{
-		float h_sum = 0, *d_ones;
+		float *d_ones;
 		Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
 		cudaMalloc(&d_ones, bytes());
 		cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice);
-		cublasAssert(cublasSdot(handle, size(), dev_mat, 1, d_ones, 1, &h_sum));
-
+		cublasAssert(cublasSdot(handle, size(), dev_mat, 1, d_ones, 1, &mat_sum));
 		cudaFree(d_ones);
-		return h_sum;
+
+		return mat_sum;
 	}
 }
 
