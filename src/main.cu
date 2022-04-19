@@ -4,46 +4,15 @@
 
 int main()
 {
+
+	friend Matrix;
+
 	Matrix X(20, 1), Y(5, 1);
 
-	X.Uniform(-1, 1);
-	Y.Uniform(-1, 1);
-
-	// it is better to fill matrix on the cpu first
-	X.ToDevice();
-	Y.ToDevice();
-
-	// fill matrix with a val
-	// X.Constant(2.0);
-	// Y.Constant(4.0);
-
-	X.ToHost();
-	Y.ToHost();
-	std::cout << X << '\n'
-			  << '\n'
-			  << Y << std::endl;
-
-	X.dot(Y.transpose());
-
-	X.ToHost();
 	std::cout << X << '\n';
+	std::cout << Y << '\n';
 
-	X.Exp();
-
-	// dk x dk
-	Matrix ones(5, 5);
-	ones.Constant(1.0);
-	ones.ToDevice();
-
-	ones = X % ones;
-	X /= ones;
-	X.ToHost();
-
-	std::cout << X << '\n';
-
-	X = X.bin();
-	X.ToHost();
-	std::cout << X << '\n';
+	std::cout << X.cuda << '\n';
 
 	/*
 	float accuracy = 0.0;
