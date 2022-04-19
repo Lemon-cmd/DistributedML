@@ -45,7 +45,7 @@ public:
         void Uniform(float min, float max);
 
         /* Transpose */
-        void T();                       // transpose in-place
+        void T();           // transpose in-place
         Matrix transpose(); // transpose and return
 
         /* Sum */
@@ -56,7 +56,7 @@ public:
         Matrix power(float val) const;
 
         /* Matrix Multiplication */
-        void dot(const Matrix &val);                       // matrix mult in-place
+        void dot(const Matrix &val);               // matrix mult in-place
         Matrix operator%(const Matrix &val) const; // matrix mult and return
 
         /*
@@ -140,7 +140,7 @@ private:
         float *dev_mat;
 
         func_t<float> cu_log, cu_exp, cu_tanh,
-                cu_sigmoid;
+            cu_sigmoid;
 
         func_alph<float> cu_elu, cu_sign, cu_relu;
 
@@ -191,7 +191,7 @@ private:
  *  */
 
 std::ostream &operator<<(std::ostream &stream,
-                                                 const Shape &dim)
+                         const Shape &dim)
 {
         stream << '(' << dim.first << ' ' << dim.second << ')' << std::endl;
         return stream;
@@ -297,7 +297,7 @@ void Matrix::ToHost()
         {
                 mat = Tensor2d::Zero(rows, cols);
                 cudaMemcpy(mat.data(), dev_mat, bytes(),
-                                   cudaMemcpyDeviceToHost);
+                           cudaMemcpyDeviceToHost);
         }
 }
 
@@ -346,7 +346,7 @@ void Matrix::Constant(float val)
 void Matrix::Uniform(float min, float max)
 {
         mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
-                                                                { return this->randint(min, max); });
+                                    { return this->randint(min, max); });
         allocDevice(mat.data());
 }
 
@@ -441,7 +441,7 @@ Matrix Matrix::bin() const
         if (!cuda)
         {
                 item.mat = mat.NullaryExpr([this](float x)
-                                                                   { if (x < 0.5f) return 0.0f;
+                                           { if (x < 0.5f) return 0.0f;
                                                                      return 1.0f; });
         }
         else
@@ -836,7 +836,8 @@ Matrix Matrix::operator*(const Matrix &val) const
                 cublasCreate(&item.handle);
                 cudaMalloc(&item.dev_mat, bytes());
                 cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
-                mult_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());                cudaDeviceSynchronize();
+                mult_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+                cudaDeviceSynchronize();
         }
 
         return item;
@@ -919,7 +920,8 @@ void Matrix::Sigmoid()
         }
         else
         {
-                apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sigmoid, this->size());        }
+                apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sigmoid, this->size());
+        }
 }
 
 void Matrix::Elu(float alph)
@@ -927,7 +929,7 @@ void Matrix::Elu(float alph)
         if (!cuda)
         {
                 mat = mat.NullaryExpr([&alph, this](float x)
-                                                          { if (x < 0.0f) return alph * (exp(x) - 1.0f);
+                                      { if (x < 0.0f) return alph * (exp(x) - 1.0f);
                                                                           return x; });
         }
         else
@@ -941,8 +943,8 @@ void Matrix::Relu(float alph)
         if (!cuda)
         {
                 mat = mat.NullaryExpr([&alph, this](float x)
-                                                          { if (x < 0.0) return alph;
-                                                                          return x; });
+                                      { if (x < 0.0) return alph;
+                                        return x; });
         }
         else
         {
@@ -955,7 +957,7 @@ void Matrix::Sign(float alph)
         if (!cuda)
         {
                 mat = mat.NullaryExpr([&alph, this](float x)
-                                                          { if (x < 0.0f) return alph;
+                                      { if (x < 0.0f) return alph;
                                                                           return 1.0f; });
         }
         else
@@ -965,4 +967,3 @@ void Matrix::Sign(float alph)
 }
 
 #endif
-

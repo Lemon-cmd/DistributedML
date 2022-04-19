@@ -12,67 +12,29 @@ class Matrix
 public:
     /* Constructors */
     Matrix();
-
-    Matrix(size_t r);
-
     Matrix(const Matrix &val);
-
     Matrix(size_t r, size_t c);
-
     Matrix(const Shape &shape);
-
-    Matrix(size_t r, size_t c,
-           const float *arr);
-
-    Matrix(size_t r, size_t c,
-           const std::vector<float> &arr);
-
-    /* Destructor */
-    ~Matrix()
-    {
-        cudaAssert(cudaFree(dev_mat));
-        cublasAssert(cublasDestroy(handle));
-    }
+    Matrix(size_t r, size_t c, const float *arr);
+    Matrix(size_t r, size_t c, const std::vector<float> &arr);
 
     /* GPU/CPU utils */
     void ToHost();
+    void ToDevice();
 
     /* Filling Methods */
     void Random();
     void Constant(float val);
     void Uniform(float min, float max);
 
-    /* Return array on the gpu */
-    float *DevData() const { return dev_mat; }
-
-    /* Return Eigen::MatrixXf */
-    const Tensor2d &HostData() const { return host_mat; }
-
-    /* Return size of matrix */
-    size_t size() const { return rows * cols; }
-
-    /* Return shape of matrix */
-    Shape shape() const { return std::make_pair(rows, cols); }
-
-    /* Return bytes w.r.t mat size */
-    size_t bytes() const
-    {
-        return this->size() * sizeof(float);
-    }
-
 private:
     bool cuda = false;
 
-    float *dev_mat;
     Tensor2d host_mat;
+    float *dev_mat = nullptr;
 
     cublasHandle_t handle;
     size_t rows = 1, cols = 1;
-
-    func_t<float> cu_log, cu_exp, cu_tanh,
-        cu_sigmoid;
-
-    func_alph<float> cu_elu, cu_sign, cu_relu;
 
     float randint(float min, float max) const
     {
@@ -81,47 +43,17 @@ private:
         std::uniform_real_distribution<> dist(min, max);
         return dist(gen);
     }
-
-    void allocDevice(const float *val, bool dev_transfer = false)
-    {
-        cudaAssert(cudaFree(dev_mat));
-        cudaAssert(cudaMalloc((void **)&dev_mat, bytes()));
-        cudaAssert(cudaMemset(dev_mat, 0, bytes()));
-
-        if (!dev_transfer)
-            cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
-        else
-            cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyDeviceToDevice);
-    }
-
-    void allocDevFuncs()
-    {
-        cudaAssert(cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>)));
-
-        cudaAssert(cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>)));
-    }
-
-    void ToDevice()
-    {
-        if (!cuda)
-        {
-            cuda = true;
-            allocDevFuncs();
-            cublasAssert(cublasCreate(&handle));
-            cudaAssert(cudaMalloc((void **)&dev_mat, bytes()));
-            cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
-        }
-        else
-        {
-            allocDevice(host_mat.data());
-        }
-    }
 };
+
+/*
+ *
+ *
+ *
+ * -------------- Non-class Methods --------------
+ *
+ *
+ *
+ *  */
 
 std::ostream &operator<<(std::ostream &stream,
                          const Shape &dim)
@@ -148,108 +80,24 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
 Matrix::Matrix()
 {
     host_mat = Tensor2d::Zero(rows, cols);
-    ToDevice();
+
+    if (dev_mat == nullptr_t)
+        std::cout << "Yes!!\n";
 }
 
-Matrix::Matrix(size_t r) : rows(r)
-{
-    Matrix();
-}
+Matrix::Matrix(const Matrix &val) {}
+Matrix::Matrix(size_t r, size_t c) {}
+Matrix::Matrix(const Shape &shape) {}
+Matrix::Matrix(size_t r, size_t c, const float *arr) {}
+Matrix::Matrix(size_t r, size_t c, const std::vector<float> &arr) {}
 
-Matrix::Matrix(size_t r, size_t c) : rows(r), cols(c)
-{
-    Matrix();
-}
+/* GPU/CPU utils */
+void Matrix::ToHost() {}
+void Matrix::ToDevice() {}
 
-Matrix::Matrix(const Shape &shape)
-{
-    rows = shape.first;
-    cols = shape.second;
-
-    Matrix();
-}
-
-Matrix::Matrix(const Matrix &val)
-{
-    rows = val.rows;
-    cols = val.cols;
-
-    Matrix();
-    host_mat = val.host_mat;
-    allocDevice(val.dev_mat, true);
-}
-
-Matrix::Matrix(size_t r, size_t c,
-               const float *arr)
-{
-    rows = r;
-    cols = c;
-    host_mat = Eigen::Map<const Tensor2d>(arr, rows, cols);
-    ToDevice();
-}
-
-Matrix::Matrix(size_t r, size_t c,
-               const std::vector<float> &arr)
-{
-    rows = r;
-    cols = c;
-    host_mat = Eigen::Map<const Tensor2d>(arr.data(), rows, cols);
-    ToDevice();
-}
-
-/*
- *
- *
- *
- * -------------- Device/Host Move Methods --------------
- *
- *
- *
- *  */
-
-void Matrix::ToHost()
-{
-    assert(!cuda);
-
-    host_mat = Tensor2d::Zero(rows, cols);
-    cudaMemcpy(host_mat.data(), dev_mat, bytes(),
-               cudaMemcpyDeviceToHost);
-}
-
-/*
- *
- *
- *
- * -------------- Initialize Methods --------------
- *
- *
- *
- *  */
-
-void Matrix::Random()
-{
-    host_mat = Tensor2d::Random(rows, cols);
-    allocDevice(host_mat.data());
-}
-
-void Matrix::Constant(float val)
-{
-    if (!cuda)
-    {
-        host_mat = Tensor2d::Constant(rows, cols, val);
-    }
-    else
-    {
-        fill_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
-        cudaDeviceSynchronize();
-    }
-}
-
-void Matrix::Uniform(float min, float max)
-{
-    host_mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
-                                     { return this->randint(min, max); });
-    allocDevice(host_mat.data());
-}
+/* Filling Methods */
+void Matrix::Random() {}
+void Matrix::Constant(float val) {}
+void Matrix::Uniform(float min, float max) {}
 
 #endif
