@@ -308,8 +308,8 @@ void Matrix::ToHost()
 	assert(!cuda);
 
 	host_mat = Tensor2d::Zero(rows, cols);
-	float *mat = host_mat.data();
-	cudaAssert(cudaMemcpy(mat, dev_mat, bytes(),
+	std::cout << rows << ' ' << cols << ' ' << bytes() << '\n';
+	cudaAssert(cudaMemcpy(host_mat.data(), dev_mat, bytes(),
 						  cudaMemcpyDeviceToHost));
 }
 
