@@ -47,6 +47,7 @@ public:
 	Matrix T(); // transpose and return
 
 	// set points > 0.5 to 1 else 0;
+	void bin_();
 	Matrix bin() const;
 
 	/* Sum */
