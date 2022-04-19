@@ -137,7 +137,7 @@ private:
 
 	Tensor2d host_mat;
 	float *dev_mat;
-	size_t rows, cols;
+	size_t rows = 1, cols = 1;
 	cublasHandle_t handle;
 
 	func_t<float> cu_log, cu_exp, cu_tanh,
@@ -242,10 +242,6 @@ Matrix operator-(float val, const Matrix &mat)
 
 Matrix::Matrix()
 {
-	rows = !(rows > 0) ? 1 : rows;
-	cols = !(cols > 0) ? 1 : cols;
-
-	std::cout << rows << ' ' << cols << '\n';
 	host_mat = Tensor2d::Zero(rows, cols);
 	ToDevice();
 }
