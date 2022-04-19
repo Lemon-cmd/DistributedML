@@ -98,7 +98,7 @@ Dense::Dense(size_t neurons,
 
 void Dense::init(size_t in_dim)
 {
-	assert(init_);
+	assert(!init_);
 
 	init_ = true;
 	W_ = Matrix(in_dim,
