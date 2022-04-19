@@ -25,8 +25,7 @@ public:
 	~Matrix()
 	{
 		cudaFree(dev_mat);
-		if (cuda)
-			cublasDestroy(handle);
+		cublasDestroy(handle);
 	}
 
 	/* Disable GPU and move back to host completely */
@@ -219,6 +218,7 @@ Matrix operator-(float val, const Matrix &mat)
 
 Matrix::Matrix()
 {
+	cublasCreate(&handle);
 	cudaMalloc(&dev_mat, sizeof(float));
 }
 
@@ -300,15 +300,9 @@ void Matrix::ToHost()
 
 void Matrix::ToDevice()
 {
-	allocDevice(mat.data());
-
-	if (!cuda)
-	{
-		cublasCreate(&handle);
-	}
-
 	cuda = true;
 	allocDevFuncs();
+	allocDevice(mat.data());
 }
 
 /*
