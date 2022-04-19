@@ -59,13 +59,13 @@ int main()
 	std::vector<Dense> network(3);
 
 	network[0] = Dense(100, "identity");
-	network[0].init(5);
+	network[0].init(100, 5);
 	network[0].ToDevice();
 
 	for (uint j = 1; j < network.size(); j++)
 	{
 		network[j] = Dense(100 - j, "identity");
-		network[j].init(network[j - 1].OutShape());
+		network[j].init(100, network[j - 1].OutShape());
 		network[j].ToDevice();
 	}
 

@@ -17,6 +17,7 @@ public:
 		  float lr = 1e-3, float er = 1e-8);
 
 	void init(size_t in_dim);
+	void init(size_t batch_dim, size_t in_dim);
 
 	void ToHost();
 	void ToDevice();
@@ -113,6 +114,13 @@ void Dense::init(size_t in_dim)
 	init_weight();
 }
 
+void Dense::init(size_t batch_dim, size_t in_dim)
+{
+	init(in_dim);
+	ones_ = Matrix(batch_dim, 1);
+	ones_.ToDevice();
+}
+
 void Dense::ToHost()
 {
 	assert(init_);
@@ -139,9 +147,6 @@ void Dense::ToDevice()
 void Dense::forward(const Matrix &X)
 {
 	assert(init_);
-
-	ones_ = Matrix(X.shape().first, 1);
-	ones_.ToDevice();
 
 	std::cout << X.shape() << '\n'
 			  << ones_.shape() << '\n'
