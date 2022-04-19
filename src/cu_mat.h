@@ -30,7 +30,7 @@ public:
 	/* Destructor */
 	~Matrix()
 	{
-		cudaAssert(cudaFree(dev_mat));
+		cudaFree(dev_mat);
 		cublasAssert(cublasDestroy(handle));
 	}
 
