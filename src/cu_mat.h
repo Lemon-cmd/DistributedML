@@ -234,8 +234,15 @@ void Matrix::Random()
 
 void Matrix::Constant(float val)
 {
-    fill_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
-    cudaAssert(cudaDeviceSynchronize());
+    if (!cuda)
+    {
+        host_mat = Tensor2d::Constant(rows, cols, val);
+    }
+    else
+    {
+        fill_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+        cudaDeviceSynchronize();
+    }
 }
 
 void Matrix::Uniform(float min, float max)
