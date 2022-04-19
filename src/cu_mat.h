@@ -433,7 +433,7 @@ void Matrix::pow_(float val)
 	cudaDeviceSynchronize();
 }
 
-Matrix::pow(float val) const
+Matrix Matrix::pow(float val) const
 {
 	Matrix item(rows, cols);
 
