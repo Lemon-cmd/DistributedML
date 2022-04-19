@@ -99,8 +99,6 @@ Dense::Dense(uint neurons,
 void Dense::init(int in_dim)
 {
 	init_ = true;
-	out_dim_.first = in_dim;
-
 	W_ = Matrix(in_dim,
 				out_dim_);
 
