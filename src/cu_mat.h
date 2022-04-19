@@ -49,7 +49,7 @@ public:
 	Matrix transpose(); // transpose and return
 
 	/* Sum */
-	float sum();
+	float sum() const;
 
 	/* Power Function */
 	void pow(float val);
@@ -135,9 +135,9 @@ private:
 	bool cuda = false;
 
 	Tensor2d mat;
+	float *dev_mat;
 	size_t rows, cols;
 	cublasHandle_t handle;
-	float *dev_mat, mat_sum;
 
 	func_t<float> cu_log, cu_exp, cu_tanh,
 		cu_sigmoid;
@@ -413,7 +413,7 @@ Matrix Matrix::transpose()
  *
  *  */
 
-float Matrix::sum()
+float Matrix::sum() const
 {
 	if (!cuda)
 	{
@@ -421,7 +421,7 @@ float Matrix::sum()
 	}
 	else
 	{
-		float *d_ones;
+		float mat_sum, *d_ones;
 		Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
 		cudaMalloc(&d_ones, bytes());
 		cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice);
