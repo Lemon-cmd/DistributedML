@@ -25,7 +25,6 @@ public:
 	~Matrix()
 	{
 		cudaFree(dev_mat);
-		cublasDestroy(handle);
 	}
 
 	/* Disable GPU and move back to host completely */
