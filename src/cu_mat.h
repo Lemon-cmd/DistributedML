@@ -304,7 +304,7 @@ Matrix::Matrix(size_t r, size_t c,
 
 void Matrix::ToHost()
 {
-	assert(cuda);
+	assert(!cuda);
 
 	host_mat = Tensor2d::Zero(rows, cols);
 
