@@ -25,6 +25,7 @@ public:
 	~Matrix()
 	{
 		cudaFree(dev_mat);
+		cublasDestroy(handle);
 	}
 
 	/* Disable GPU and move back to host completely */
@@ -217,7 +218,6 @@ Matrix operator-(float val, const Matrix &mat)
 
 Matrix::Matrix()
 {
-	cublasCreate(&handle);
 	cudaMalloc(&dev_mat, sizeof(float));
 }
 
@@ -225,13 +225,13 @@ Matrix::Matrix(size_t r) { Matrix(r, 1); }
 
 Matrix::Matrix(const Shape &shape)
 {
+	Matrix();
 	Matrix(shape.first, shape.second);
 }
 
 Matrix::Matrix(const Matrix &val)
 {
 	mat = val.mat;
-	cublasCreate(&handle);
 	rows = val.rows, cols = val.cols;
 
 	if (val.cuda)
@@ -301,6 +301,7 @@ void Matrix::ToDevice()
 {
 	cuda = true;
 	allocDevFuncs();
+	cublasCreate(&handle);
 	allocDevice(mat.data());
 }
 
@@ -383,12 +384,9 @@ Matrix Matrix::transpose()
 	}
 	else
 	{
-		item.cuda = true;
-		cudaFree(item.dev_mat);
-		cudaMalloc(&item.dev_mat, bytes());
-		cudaMemset(item.dev_mat, 0.0, bytes());
-
-		cublas_transpose(dev_mat, item.dev_mat, rows, cols, handle);
+		item.Constant(0.0);
+		item.ToDevice();
+		cublas_transpose(dev_mat, item.dev_mat, rows, cols, item.handle);
 		cudaDeviceSynchronize();
 	}
 
@@ -411,7 +409,7 @@ float Matrix::sum() const
 	}
 	else
 	{
-		float mat_sum, *d_ones;
+		float mat_sum = 0, *d_ones;
 		Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
 		cudaMalloc(&d_ones, bytes());
 		cudaMemcpy(d_ones, ones.data(), bytes(), cudaMemcpyHostToDevice);
@@ -436,7 +434,7 @@ Matrix Matrix::bin() const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -472,11 +470,10 @@ void Matrix::dot(const Matrix &val)
 	}
 	else
 	{
-		float *new_mat;
-		cudaMalloc(&new_mat, bytes());
-		cudaMemset(new_mat, 0.0, bytes());
+		Tensor2d new_mat = Tensor2d::Zero(rows, val.rows);
+		cudaMalloc(&new_mat.data(), bytes());
 
-		cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
+		cublas_mat_mult(dev_mat, val.dev_mat, new_mat.data(), rows, val.rows, val.cols, handle);
 		cudaDeviceSynchronize();
 
 		cudaFree(dev_mat);
@@ -538,7 +535,9 @@ void Matrix::operator=(const Matrix &val)
 
 	if (val.cuda)
 	{
-		cuda = true;
+		if (!cuda)
+			ToDevice();
+
 		cudaFree(dev_mat);
 		cudaMalloc(&dev_mat, bytes());
 		cudaMemcpy(dev_mat, val.dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -617,8 +616,7 @@ Matrix Matrix::operator+(float val) const
 	}
 	else
 	{
-		item.cuda = true;
-		cudaFree(item.dev_mat);
+		item.ToDevice();
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
 		add_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
@@ -638,7 +636,7 @@ Matrix Matrix::operator-(float val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -661,7 +659,7 @@ Matrix Matrix::operator*(float val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -682,7 +680,7 @@ Matrix Matrix::operator/(float val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -778,7 +776,7 @@ Matrix Matrix::operator+(const Matrix &val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -800,7 +798,7 @@ Matrix Matrix::operator-(const Matrix &val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -822,7 +820,7 @@ Matrix Matrix::operator*(const Matrix &val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
@@ -845,7 +843,7 @@ Matrix Matrix::operator/(const Matrix &val) const
 	}
 	else
 	{
-		item.cuda = true;
+		item.ToDevice();
 		cudaFree(item.dev_mat);
 		cudaMalloc(&item.dev_mat, bytes());
 		cudaMemcpy(item.dev_mat, dev_mat, bytes(), cudaMemcpyDeviceToDevice);
