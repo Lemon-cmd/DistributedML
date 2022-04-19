@@ -24,7 +24,7 @@ public:
 	/* Destructor */
 	~Matrix()
 	{
-		deallocDevMat();
+		cudaFree(dev_mat);
 		if (cuda)
 			cublasDestroy(handle);
 	}
@@ -372,7 +372,7 @@ void Matrix::T()
 		cublas_transpose(dev_mat, new_mat, rows, cols, handle);
 		cudaDeviceSynchronize();
 
-		deallocDevMat();
+		cudaFree(dev_mat);
 		dev_mat = new_mat;
 	}
 
@@ -486,7 +486,7 @@ void Matrix::dot(const Matrix &val)
 		cublas_mat_mult(dev_mat, val.dev_mat, new_mat, rows, val.rows, val.cols, handle);
 		cudaDeviceSynchronize();
 
-		deallocDevMat();
+		cudaFree(dev_mat);
 		dev_mat = new_mat;
 	}
 }
@@ -542,7 +542,7 @@ void Matrix::operator=(const Matrix &val)
 	rows = val.rows;
 	cols = val.cols;
 	Matrix(rows, cols);
-	deallocDevMat();
+	cudaFree(dev_mat);
 
 	if (val.cuda)
 	{
