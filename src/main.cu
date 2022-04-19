@@ -3,8 +3,6 @@
 #include "cu_mat.h"
 #include "clockcycle.h"
 
-#define L std::unique_ptr<Layer>
-
 int main()
 {
 	/*
@@ -58,27 +56,25 @@ int main()
 	X.ToDevice();
 	Y.ToDevice();
 
-	std::vector<L>
-		network(3);
+	std::vector<Dense> network(3);
 
-	network[0] = L{new Dense(100, "identity")};
-	network[0]->init(5);
-	network[0]->ToDevice();
+	network[0] = Dense(100, "identity");
+	network[0].init(5);
+	network[0].ToDevice();
 
 	for (uint j = 1; j < network.size(); j++)
 	{
-		network[j] = L{new Dense(100 - j, "identity")};
-		std::cout << network[j - 1]->OutShape() << '\n';
-		network[j]->init(network[j - 1]->OutShape());
-		network[j]->ToDevice();
+		network[j] = Dense(100 - j, "identity");
+		network[j].init(network[j - 1].OutShape());
+		network[j].ToDevice();
 	}
 
-	network[0]->forward(X);
+	network[0].forward(X);
 	for (uint j = 1; j < network.size(); j++)
 	{
-		network[j]->forward(network[j - 1]->Get_H());
+		network[j].forward(network[j - 1].Get_H());
 	}
 
-	float loss = network.back()->MSELoss(Y, accuracy);
+	float loss = network.back().MSELoss(Y, accuracy);
 	std::cout << "L: " << loss << std::endl;
 }

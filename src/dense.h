@@ -37,12 +37,16 @@ public:
 
 	float MSELoss(const Matrix &Y, float &accuracy) override
 	{
+		assert(init_);
+
 		dH_ = dH_ * (H_ - Y);
 		return sqrtf((H_ - Y).power(2.0).sum());
 	}
 
 	float CrossEntropyLoss(const Matrix &Y, float &accuracy) override
 	{
+		assert(init_);
+
 		std::cout << "Fail\n";
 		dH_ = H_ - Y;
 		std::cout << "Fail?\n";
@@ -111,6 +115,8 @@ void Dense::init(size_t in_dim)
 
 void Dense::ToHost()
 {
+	assert(init_);
+
 	if (cuda_)
 	{
 		W_.ToHost();
@@ -123,6 +129,8 @@ void Dense::ToHost()
 
 void Dense::ToDevice()
 {
+	assert(init_);
+
 	cuda_ = true;
 	W_.ToDevice();
 	B_.ToDevice();
@@ -130,6 +138,8 @@ void Dense::ToDevice()
 
 void Dense::forward(const Matrix &X)
 {
+	assert(init_);
+
 	ones_ = Matrix(X.shape().first, 1);
 	ones_.ToDevice();
 
@@ -149,6 +159,8 @@ void Dense::forward(const Matrix &X)
 
 void Dense::update()
 {
+	assert(init_);
+
 	static Matrix dW;
 	// d x m
 	I_.T();
