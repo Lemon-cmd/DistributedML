@@ -27,6 +27,27 @@ public:
     void Constant(float val);
     void Uniform(float min, float max);
 
+    /* Return array on the gpu */
+    float *DevData() const { return dev_mat; }
+
+    /* Return Eigen::MatrixXf */
+    const Tensor2d &HostData() const
+    {
+        return mat;
+    }
+
+    /* Return size of matrix */
+    size_t size() const { return rows * cols; }
+
+    /* Return shape of matrix */
+    Shape shape() const { return std::make_pair(rows, cols); }
+
+    /* Return bytes w.r.t mat size */
+    size_t bytes() const
+    {
+        return this->size() * sizeof(float);
+    }
+
 private:
     bool cuda = false;
 
