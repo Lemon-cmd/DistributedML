@@ -145,11 +145,16 @@ private:
 
 	func_alph<float> cu_elu, cu_sign, cu_relu;
 
-	void allocDevice(float *val, bool dev_transfer = false)
+	void allocDevMat()
+	{
+		dev_mat = (float *)malloc(bytes());
+	}
+
+	void allocDevice(const float *val, bool dev_transfer = false)
 	{
 		cudaAssert(cudaFree(dev_mat));
 
-		dev_mat = val;
+		allocDevMat();
 		cudaAssert(cudaMallocManaged(&dev_mat, bytes()));
 		cudaAssert(cudaMemset(dev_mat, 0, bytes()));
 
@@ -164,8 +169,8 @@ private:
 		if (!cuda)
 		{
 			cuda = true;
+			allocDevMat();
 			allocDevFuncs();
-			dev_mat = host_mat.data();
 			cublasAssert(cublasCreate(&handle));
 			cudaAssert(cudaMallocManaged(&dev_mat, bytes()));
 			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
