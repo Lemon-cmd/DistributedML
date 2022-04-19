@@ -47,6 +47,5 @@ int main()
 	std::cout << "L: " << loss << std::endl;
 	*/
 
-	cudaDeviceReset();
 	return 0;
 }
