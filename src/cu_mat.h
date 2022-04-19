@@ -148,6 +148,8 @@ private:
 	void allocDevice(const float *val, bool dev_transfer = false)
 	{
 		cudaAssert(cudaFree(dev_mat));
+
+		dev_mat = val;
 		cudaAssert(cudaMallocManaged(&dev_mat, bytes()));
 		cudaAssert(cudaMemset(dev_mat, 0, bytes()));
 
@@ -163,6 +165,7 @@ private:
 		{
 			cuda = true;
 			allocDevFuncs();
+			dev_mat = host_mat.data();
 			cublasAssert(cublasCreate(&handle));
 			cudaAssert(cudaMallocManaged(&dev_mat, bytes()));
 			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
@@ -247,7 +250,7 @@ Matrix operator-(float val, const Matrix &mat)
 
 Matrix::Matrix()
 {
-	host_mat = Tensor2d::Zero(rows, cols);
+	host_mat = Tensor2d::Constant(rows, cols, 0.0);
 	ToDevice();
 }
 
