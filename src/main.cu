@@ -7,6 +7,7 @@
 
 int main()
 {
+	/*
 	Matrix X(20, 1), Y(5, 1);
 
 	X.Uniform(-1, 1);
@@ -47,4 +48,36 @@ int main()
 	X = X.bin();
 	X.ToHost();
 	std::cout << X << '\n';
+	*/
+
+	float accuracy = 0.0;
+
+	Matrix X(100, 5), Y(100, 10);
+	X.Random();
+	Y.Constant(1);
+	X.ToDevice();
+	Y.ToDevice();
+
+	std::vector<L>
+		network(3);
+
+	network[0] = L{new Dense(100)};
+	network[0]->init(5);
+	network[0]->ToDevice();
+
+	for (uint j = 1; j < network.size(); j++)
+	{
+		network[j] = L{new Dense(100)};
+		network[j]->init(network[j - 1]->OutShape());
+		network[j]->ToDevice();
+	}
+
+	network[0]->forward(X);
+	for (uint j = 1; j < network.size(); j++)
+	{
+		network[j]->forward(network[j - 1]->Get_H());
+	}
+
+	float loss = network.back()->MSELoss(Y, accuracy);
+	std::cout << "L: " << loss << std::endl;
 }
