@@ -6,13 +6,7 @@ int main()
 {
 	cudaSetDevice(0);
 
-	Matrix X(20, 1), Y(5, 1);
-
-	X.Constant(1.0);
-	Y.Constant(2.0f);
-
-	X.ToHost();
-	Y.ToHost();
+	Matrix X(), Y();
 
 	std::cout << X << '\n';
 	std::cout << Y << '\n';

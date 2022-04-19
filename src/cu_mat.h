@@ -51,8 +51,8 @@ public:
 private:
     bool cuda = false;
 
+    float *dev_mat = NULL;
     Tensor2d host_mat;
-    float *dev_mat = nullptr;
 
     cublasHandle_t handle;
     size_t rows = 1, cols = 1;
@@ -102,8 +102,8 @@ Matrix::Matrix()
 {
     host_mat = Tensor2d::Zero(rows, cols);
 
-    if (dev_mat == nullptr)
-        std::cout << "Yes!!\n";
+    if (dev_mat == NULL)
+        std::cout << "hi\n";
 }
 
 Matrix::Matrix(const Matrix &val) {}
