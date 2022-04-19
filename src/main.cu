@@ -1,5 +1,4 @@
 #include "modules.h"
-#include "dense.h"
 #include "cu_mat.h"
 #include "clockcycle.h"
 

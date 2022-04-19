@@ -21,11 +21,11 @@ public:
 
 	Matrix(const Shape &shape);
 
-	Matrix(size_t r, size_t c, 
+	Matrix(size_t r, size_t c,
 		   const float *arr);
 
-	Matrix(size_t r, size_t c, 
-           const std::vector<float> &arr);
+	Matrix(size_t r, size_t c,
+		   const std::vector<float> &arr);
 
 	/* Destructor */
 	~Matrix()
@@ -36,7 +36,6 @@ public:
 
 	/* GPU/CPU utils */
 	void ToHost();
-	void ToDevice();
 
 	// set points > 0.5 to 1 else 0;
 	Matrix bin() const;
@@ -47,8 +46,8 @@ public:
 	void Uniform(float min, float max);
 
 	/* Transpose */
-	void T_();			// transpose in-place
-	Matrix T();         // transpose and return
+	void T_();	// transpose in-place
+	Matrix T(); // transpose and return
 
 	/* Sum */
 	float sum() const;
@@ -153,6 +152,22 @@ private:
 		cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice);
 	}
 
+	void ToDevice()
+	{
+		if (!cuda)
+		{
+			cuda = true;
+			allocDevFuncs();
+			cublasCreate(&handle);
+			cudaMalloc(&dev_mat, bytes());
+			cudaMemcpy(dev_mat, mata.data(), bytes(), cudaMemcpyHostToDevice);
+		}
+		else
+		{
+			allocDevice(mat.data());
+		}
+	}
+
 	void allocDevFuncs()
 	{
 		cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>));
@@ -213,7 +228,89 @@ Matrix operator-(float val, const Matrix &mat)
 	return out;
 }
 
+/*
+ *
+ *
+ *
+ * -------------- Constructors --------------
+ *
+ *
+ *
+ *  */
 
+Matrix::Matrix()
+{
+	rows = !(rows > 0) ? 1 : rows;
+	cols = !(cols > 0) ? 1 : cols;
 
+	mat = Tensor2d::Zero(rows, cols);
+	ToDevice();
+}
+
+Matrix::Matrix(size_t r) : rows(r)
+{
+	Matrix();
+}
+
+Matrix::Matrix(size_t r, size_t c) : rows(r), cols(c)
+{
+	Matrix();
+}
+
+Matrix::Matrix(const Shape &shape)
+{
+	rows = shape.first;
+	cols = shape.second;
+
+	Matrix();
+}
+
+Matrix::Matrix(const Matrix &val)
+{
+	rows = val.rows;
+	cols = val.cols;
+
+	Matrix();
+	mat = val.mat;
+	allocDevice(val.dev_mat);
+}
+
+Matrix::Matrix(size_t r, size_t c,
+			   const float *arr)
+{
+	rows = r;
+	cols = c;
+	mat = Eigen::Map<const Tensor2d>(arr, rows, cols);
+	ToDevice();
+}
+
+Matrix::Matrix(size_t r, size_t c,
+			   const std::vector<float> &arr)
+{
+	rows = r;
+	cols = c;
+	mat = Eigen::Map<const Tensor2d>(arr.data(), rows, cols);
+	ToDevice();
+}
+
+/*
+ *
+ *
+ *
+ * -------------- Device/Host Move Methods --------------
+ *
+ *
+ *
+ *  */
+
+void Matrix::ToHost()
+{
+	assert(cuda);
+
+	mat = Tensor2d::Zero(rows, cols);
+
+	cudaMemcpy(mat.data(), dev_mat, bytes(),
+			   cudaMemcpyDeviceToHost);
+}
 
 #endif
