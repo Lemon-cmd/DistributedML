@@ -98,6 +98,7 @@ private:
     {
         if (!cuda)
         {
+            std::cout << "Constructing!!!\n";
             cuda = true;
             allocDevFuncs();
             cublasAssert(cublasCreate(&handle));
@@ -147,7 +148,7 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
 
 Matrix::Matrix()
 {
-    host_mat = Tensor2d::Constant(rows, cols, 0.0);
+    host_mat = Tensor2d::Zero(rows, cols);
     ToDevice();
 }
 
