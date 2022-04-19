@@ -117,7 +117,7 @@ public:
 	/* Return Eigen::MatrixXf */
 	const Tensor2d &HostData() const
 	{
-		return mat;
+		return host_mat;
 	}
 
 	/* Return size of matrix */
@@ -135,7 +135,7 @@ public:
 private:
 	bool cuda = false;
 
-	Tensor2d mat;
+	Tensor2d host_mat;
 	float *dev_mat;
 	size_t rows, cols;
 	cublasHandle_t handle;
@@ -160,11 +160,11 @@ private:
 			allocDevFuncs();
 			cublasCreate(&handle);
 			cudaMalloc(&dev_mat, bytes());
-			cudaMemcpy(dev_mat, mata.data(), bytes(), cudaMemcpyHostToDevice);
+			cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice);
 		}
 		else
 		{
-			allocDevice(mat.data());
+			allocDevice(host_mat.data());
 		}
 	}
 
@@ -243,7 +243,7 @@ Matrix::Matrix()
 	rows = !(rows > 0) ? 1 : rows;
 	cols = !(cols > 0) ? 1 : cols;
 
-	mat = Tensor2d::Zero(rows, cols);
+	host_mat = Tensor2d::Zero(rows, cols);
 	ToDevice();
 }
 
@@ -271,7 +271,7 @@ Matrix::Matrix(const Matrix &val)
 	cols = val.cols;
 
 	Matrix();
-	mat = val.mat;
+	host_mat = val.host_mat;
 	allocDevice(val.dev_mat);
 }
 
@@ -280,7 +280,7 @@ Matrix::Matrix(size_t r, size_t c,
 {
 	rows = r;
 	cols = c;
-	mat = Eigen::Map<const Tensor2d>(arr, rows, cols);
+	host_mat = Eigen::Map<const Tensor2d>(arr, rows, cols);
 	ToDevice();
 }
 
@@ -289,7 +289,7 @@ Matrix::Matrix(size_t r, size_t c,
 {
 	rows = r;
 	cols = c;
-	mat = Eigen::Map<const Tensor2d>(arr.data(), rows, cols);
+	host_mat = Eigen::Map<const Tensor2d>(arr.data(), rows, cols);
 	ToDevice();
 }
 

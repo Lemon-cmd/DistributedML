@@ -12,8 +12,6 @@ int main()
 	std::cout << X << '\n';
 	std::cout << Y << '\n';
 
-	std::cout << X.cuda << '\n';
-
 	/*
 	float accuracy = 0.0;
 
