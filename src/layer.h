@@ -26,8 +26,8 @@ public:
 	virtual const Matrix &Get_wparam() const = 0;
 	virtual const Matrix &Get_bparam() const = 0;
 
-	virtual Matrix Get_H() const = 0;
-	virtual Matrix Get_dJ() const = 0;
+	virtual const Matrix &Get_H() const = 0;
+	virtual const Matrix &Get_dJ() const = 0;
 
 	virtual const Matrix &Get_delta() const = 0;
 
@@ -40,7 +40,7 @@ protected:
 	string afunc_;
 	float lr_, er_;
 	size_t out_dim_;
-	bool init_ = false, cuda_ = false;
+	bool init_ = false;
 
 	virtual void init_weight() = 0;
 

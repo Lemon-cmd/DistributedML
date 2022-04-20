@@ -39,14 +39,21 @@ int main()
 
 	std::vector<Dense> network(3);
 
+	std::cout << "Init:\n";
+
 	network[0] = Dense(100, "identity");
 	network[0].init(5);
 
-	for (uint j = 1; j < network.size(); j++)
+	for (uint j = 1; j < network.size() - 1; j++)
 	{
 		network[j] = Dense(100 - j, "identity");
 		network[j].init(network[j - 1].OutShape());
 	}
+
+	network.back() = Dense(10, "softmax");
+	network.back().init(network[network.size() - 2].OutShape());
+
+	std::cout << "Forward:\n";
 
 	network[0].forward(X);
 	for (uint j = 1; j < network.size(); j++)
@@ -54,8 +61,12 @@ int main()
 		network[j].forward(network[j - 1].Get_H());
 	}
 
+	std::cout << "Loss:\n";
 	float loss = network.back().MSELoss(Y, accuracy);
 	std::cout << "L: " << loss << std::endl;
+
+	network.back().ToHost();
+	std::cout << network.back().Get_H() << '\n';
 
 	return 0;
 }
