@@ -229,6 +229,29 @@ std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
     return stream << matrix.HostData() << std::endl;
 }
 
+Matrix operator/(float val, const Matrix &mat)
+{
+    Matrix item(mat);
+    item.pow_(-1.0);
+
+    return item * val;
+}
+
+Matrix operator*(float val, const Matrix &mat)
+{
+    return mat * val;
+}
+
+Matrix operator-(float val, const Matrix &mat)
+{
+    return (mat * -1.0) + val;
+}
+
+Matrix operator+(float val, const Matrix &mat)
+{
+    return mat + val;
+}
+
 /*
  *
  *

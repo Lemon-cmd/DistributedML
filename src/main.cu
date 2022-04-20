@@ -17,6 +17,16 @@ int main()
 	std::cout << X << '\n';
 	std::cout << Y << '\n';
 
+	X.ToHost();
+	Y.ToHost();
+
+	std::cout << X.log() << '\n';
+	std::cout << Y.log() << '\n';
+
+	Matrix A = X.T().dot(Y);
+	A.ToHost();
+	std::cout << A << '\n';
+
 	/*
 	float accuracy = 0.0;
 
