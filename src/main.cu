@@ -8,7 +8,7 @@ int random_idx(int min, int max)
 {
 	std::random_device rd;	// Will be used to obtain a seed for the random number engine
 	std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-	std::uniform_int_distribution<> distrib(min, max);
+	std::uniform_int_distribution<> distrib(min, max - 1);
 
 	return distrib(gen);
 }
@@ -19,12 +19,12 @@ int main()
 	std::vector<Matrix> train_images, train_labels;
 	load_mnist("../data/train-images-idx3-ubyte",
 			   "../data/train-labels-idx1-ubyte",
-			   128, train_images, train_labels);
+			   512, train_images, train_labels);
 
 	std::vector<Matrix> test_images, test_labels;
 	load_mnist("../data/t10k-images-idx3-ubyte",
 			   "../data/t10k-labels-idx1-ubyte",
-			   128, test_images, test_labels);
+			   512, test_images, test_labels);
 
 	std::cout << train_images.size() << '\n'
 			  << train_labels.size() << '\n';
@@ -57,15 +57,8 @@ int main()
 		{
 			// random index
 			uint k = random_idx(0, train_images.size());
-
-			if (train_images[k].shape().first != 28 && train_images[k].shape().second != 28)
-				continue;
-
-			// std::cout << "k: " << k << std::endl;
-			// std::cout << train_images[k].shape() << ' '
-			//		  << train_labels[k].shape() << std::endl;
-
 			float acc_batch = 0.0;
+
 			// Forward pass
 			network[0].forward(train_images[k]);
 			for (uint j = 1; j < network.size(); j++)
@@ -73,7 +66,7 @@ int main()
 				network[j].forward(network[j - 1].Get_H());
 			}
 
-			loss += network.back().BCELoss(train_labels[k], acc_batch);
+			loss += network.back().MSELoss(train_images[k], acc_batch);
 			acc += acc_batch;
 
 			// network.back().ToHost();
@@ -91,8 +84,8 @@ int main()
 			i++;
 		}
 
-		loss /= i;
-		acc /= i;
+		loss /= train_images.size();
+		acc /= train_images.size();
 
 		std::cout << "L: " << loss << " A: " << acc << std::endl;
 	}
