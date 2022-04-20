@@ -5,32 +5,21 @@
 
 int main()
 {
-	/*
+
 	Matrix X(3, 1), Y(3, 1);
 
-	X.Random();
+	X.Constant(1);
 	Y.Constant(1);
 
 	X.ToHost();
 	Y.ToHost();
 
-	std::cout << X << '\n';
-	std::cout << Y << '\n';
+	std::cout << X << "\n\n"
+			  << Y << std::endl;
 
-	X = X.log();
-	Y = Y.log();
+	std::cout << X.compare(Y) << std::endl;
 
-	X.ToHost();
-	Y.ToHost();
-
-	std::cout << X << '\n';
-	std::cout << Y << '\n';
-
-	Matrix A = X.T().dot(Y);
-	A.ToHost();
-	std::cout << A << '\n';
-	*/
-
+	/*
 	float accuracy = 0.0;
 
 	Matrix X(3, 5), Y(3, 10);
@@ -81,11 +70,5 @@ int main()
 		}
 	}
 
-	Matrix A(3, 1), B(3, 1);
-	A.Constant(1.0);
-	B.Constant(1.0);
-
-	std::cout << A.compare(B) << std::endl;
-
-	return 0;
+	/*
 }
