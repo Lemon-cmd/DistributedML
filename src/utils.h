@@ -10,109 +10,6 @@
 
 #define BLOCK_SIZE 1024
 
-template <typename T>
-using func_t = T (*)(T);
-
-template <typename T>
-using func_alph = T (*)(T, T);
-
-template <typename T>
-__device__ T cudaLog(T x)
-{
-	if (x > 0.0)
-		return log(x);
-	return 1e-8;
-}
-
-template <typename T>
-__device__ T cudaExp(T x)
-{
-	return exp(x);
-}
-
-template <typename T>
-__device__ T cudaSigmoid(T x)
-{
-	return 1.0 / (1.0 + exp(-x));
-}
-
-template <typename T>
-__device__ T cudaTanh(T x)
-{
-	return tanh(x);
-}
-
-template <typename T>
-__device__ T cudaReLU(T x, T y = 0.0)
-{
-	if (x < 0.0)
-		return y;
-	return x;
-}
-
-template <typename T>
-__device__ T cudaSign(T x, T y = 0.0)
-{
-	if (x < 0.0)
-		return y;
-	return 1.0;
-}
-
-template <typename T>
-__device__ T cudaELU(T x, T y = 1.0)
-{
-	if (x < 0.0)
-		return y * (exp(x) - 1.0);
-	return x;
-}
-
-/* Methods with no alpha variable */
-template <typename T>
-__device__ func_t<T> p_log = cudaLog<T>;
-
-template <typename T>
-__device__ func_t<T> p_exp = cudaExp<T>;
-
-template <typename T>
-__device__ func_t<T> p_tanh = cudaTanh<T>;
-
-template <typename T>
-__device__ func_t<T> p_sigmoid = cudaSigmoid<T>;
-
-/* Methods with alpha variable */
-template <typename T>
-__device__ func_alph<T> p_elu = cudaELU<T>;
-
-template <typename T>
-__device__ func_alph<T> p_relu = cudaReLU<T>;
-
-template <typename T>
-__device__ func_alph<T> p_sign = cudaSign<T>;
-
-template <typename T>
-__global__ void apply_non_alph(T *arr, func_t<T> op, const size_t size)
-{
-	const uint stride = blockDim.x * gridDim.x;
-	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
-
-	for (uint j = idx; j < size; j += stride)
-	{
-		arr[j] = (*op)(arr[j]);
-	}
-}
-
-template <typename T>
-__global__ void apply_alph(T *arr, func_alph<T> op, const T alph, const size_t size)
-{
-	const uint stride = blockDim.x * gridDim.x;
-	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
-
-	for (uint j = idx; j < size; j += stride)
-	{
-		arr[j] = (*op)(arr[j], alph);
-	}
-}
-
 #define cudaAssert(ans)                       \
 	{                                         \
 		gpuAssert((ans), __FILE__, __LINE__); \
@@ -202,6 +99,59 @@ __global__ void tanh_arr(T *A, const size_t size)
 	for (uint j = idx; j < size; j += stride)
 	{
 		A[j] = tanh(A[j]);
+	}
+}
+
+template <typename T>
+__global__ void relu_arr(T *A, const T alph, const size_t size)
+{
+	const uint stride = blockDim.x * gridDim.x;
+	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+	for (uint j = idx; j < size; j += stride)
+	{
+		if (A[j] < 0.0)
+			A[j] = alph * A[j];
+	}
+}
+
+template <typename T>
+__global__ void sign_arr(T *A, const T alph, const size_t size)
+{
+	const uint stride = blockDim.x * gridDim.x;
+	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+	for (uint j = idx; j < size; j += stride)
+	{
+		if (A[j] < 0.0)
+			A[j] = alph;
+		else
+			A[j] = 1.0;
+	}
+}
+
+template <typename T>
+__global__ void elu_arr(T *A, const T alph, const size_t size)
+{
+	const uint stride = blockDim.x * gridDim.x;
+	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+	for (uint j = idx; j < size; j += stride)
+	{
+		if (A[j] < 0.0)
+			A[j] = alph * (exp(A[j] - 1.0));
+	}
+}
+
+template <typename T>
+__global__ void sigmoid_arr(T *A, const T alph, const size_t size)
+{
+	const uint stride = blockDim.x * gridDim.x;
+	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+	for (uint j = idx; j < size; j += stride)
+	{
+		A[j] = 1.0 / (1.0 + exp(-A[j]));
 	}
 }
 
