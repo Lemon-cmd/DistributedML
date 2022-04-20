@@ -28,12 +28,12 @@ int main()
 
 	std::cout << "Init:\n";
 
-	network[0] = Dense(3, "relu", 0.01);
+	network[0] = Dense(30, "relu", 0.01);
 	network[0].init(5);
 
 	for (uint j = 1; j < network.size() - 1; j++)
 	{
-		network[j] = Dense(3, "sigmoid", 0.1);
+		network[j] = Dense(50, "sigmoid", 0.1);
 		network[j].init(network[j - 1].OutShape());
 	}
 
