@@ -463,7 +463,9 @@ Matrix Matrix::dot(const Matrix &val) const
 
 void Matrix::operator=(const Matrix &val)
 {
-    *this = Matrix(val);
+    rows = val.rows, cols = val.cols;
+    init_mat();
+    ModifyDevMat(val.dev_mat, 1);
 }
 
 void Matrix::operator+=(const Matrix &val)
