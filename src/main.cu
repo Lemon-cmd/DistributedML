@@ -4,32 +4,24 @@
 #include "clockcycle.h"
 #include "parse_mnist.h"
 
+uint random_idx(int min, int max)
+{
+	return rand() % (max - min + 1) + min;
+}
+
 int main()
 {
-	/*
-	Matrix X(3, 1), Y(3, 1);
-
-	X.Constant(1);
-	Y.Constant(1);
-
-	X.ToHost();
-	Y.ToHost();
-
-	std::cout << X << "\n\n"
-			  << Y << std::endl;
-
-	std::cout << X.compare(Y) << std::endl;
-	*/
+	srand(time(NULL));
 
 	std::vector<Matrix> train_images, train_labels;
 	load_mnist("../data/train-images-idx3-ubyte",
 			   "../data/train-labels-idx1-ubyte",
-			   100, train_images, train_labels);
+			   512, train_images, train_labels);
 
 	std::vector<Matrix> test_images, test_labels;
 	load_mnist("../data/t10k-images-idx3-ubyte",
 			   "../data/t10k-labels-idx1-ubyte",
-			   100, test_images, test_labels);
+			   512, test_images, test_labels);
 
 	std::cout << train_images.size() << '\n'
 			  << train_labels.size() << '\n';
@@ -57,8 +49,12 @@ int main()
 	{
 		float loss = 0.0, acc = 0.0;
 
-		for (uint k = 0; k < train_images.size(); k++)
+		uint i = 0;
+		while (i < train_images.size())
 		{
+			// random index
+			k = random_idx(0, train_images.size());
+
 			float acc_batch = 0.0;
 			// Forward pass
 			network[0].forward(train_images[k]);
@@ -81,6 +77,8 @@ int main()
 				network[j].set_delta(network[j + 1].Get_delta());
 				network[j].update();
 			}
+
+			i++;
 		}
 
 		loss /= train_images.size();
