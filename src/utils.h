@@ -91,6 +91,18 @@ __global__ void log_arr(T *A, const size_t size)
 }
 
 template <typename T>
+__global__ void sigmoid_arr(T *A, const size_t size)
+{
+	const uint stride = blockDim.x * gridDim.x;
+	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+	for (uint j = idx; j < size; j += stride)
+	{
+		A[j] = 1.0 / (1.0 + exp(-A[j]));
+	}
+}
+
+template <typename T>
 __global__ void tanh_arr(T *A, const size_t size)
 {
 	const uint stride = blockDim.x * gridDim.x;
@@ -140,18 +152,6 @@ __global__ void elu_arr(T *A, const T alph, const size_t size)
 	{
 		if (A[j] < 0.0)
 			A[j] = alph * (exp(A[j] - 1.0));
-	}
-}
-
-template <typename T>
-__global__ void sigmoid_arr(T *A, const T alph, const size_t size)
-{
-	const uint stride = blockDim.x * gridDim.x;
-	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
-
-	for (uint j = idx; j < size; j += stride)
-	{
-		A[j] = 1.0 / (1.0 + exp(-A[j]));
 	}
 }
 
