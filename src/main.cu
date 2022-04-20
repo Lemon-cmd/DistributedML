@@ -4,8 +4,6 @@
 
 int main()
 {
-	cudaSetDevice(0);
-
 	Matrix X(3, 1), Y(3, 1);
 
 	X.Random();
@@ -17,11 +15,14 @@ int main()
 	std::cout << X << '\n';
 	std::cout << Y << '\n';
 
+	X.log_();
+	Y.log_();
+
 	X.ToHost();
 	Y.ToHost();
 
-	std::cout << X.log() << '\n';
-	std::cout << Y.log() << '\n';
+	std::cout << X << '\n';
+	std::cout << Y << '\n';
 
 	Matrix A = X.T().dot(Y);
 	A.ToHost();

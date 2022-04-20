@@ -36,13 +36,13 @@ public:
     void ToHost();
     void ToDevice();
 
-    // set points > 0.5 to 1 else 0;
-    Matrix bin() const;
-
     /* Filling Methods */
     void Random();
     void Constant(float val);
     void Uniform(float min, float max);
+
+    // set points > 0.5 to 1 else 0;
+    Matrix bin() const;
 
     /* Transpose */
     void T();           // transpose in-place

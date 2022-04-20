@@ -226,7 +226,8 @@ std::ostream &operator<<(std::ostream &stream,
 
 std::ostream &operator<<(std::ostream &stream, const Matrix &matrix)
 {
-    return stream << matrix.HostData() << std::endl;
+    stream << matrix.HostData() << std::endl;
+    return stream;
 }
 
 Matrix operator/(float val, const Matrix &mat)
