@@ -5,7 +5,7 @@
 
 int main()
 {
-
+	/*
 	Matrix X(3, 1), Y(3, 1);
 
 	X.Constant(1);
@@ -18,9 +18,7 @@ int main()
 			  << Y << std::endl;
 
 	std::cout << X.compare(Y) << std::endl;
-
-	/*
-	float accuracy = 0.0;
+	*/
 
 	Matrix X(3, 5), Y(3, 10);
 	X.Random();
@@ -46,6 +44,7 @@ int main()
 	uint epochs = 10;
 	for (uint e = 0; e < epochs; e++)
 	{
+		float accuracy = 0.0;
 
 		// Forward pass
 		network[0].forward(X);
@@ -55,10 +54,10 @@ int main()
 		}
 
 		float loss = network.back().BCELoss(Y, accuracy);
-		std::cout << "L: " << loss << std::endl;
+		std::cout << "L: " << loss << " A: " << accuracy << std::endl;
 
-		network.back().ToHost();
-		std::cout << "H: " << network.back().Get_H() << std::endl;
+		// network.back().ToHost();
+		// std::cout << "H: " << network.back().Get_H() << std::endl;
 
 		// Update
 		network.back().update();
@@ -69,6 +68,4 @@ int main()
 			network[j].update();
 		}
 	}
-
-	*/
 }

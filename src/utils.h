@@ -71,8 +71,8 @@ __global__ void match_arr(const T *A, const T *B, T *matches, const size_t size)
 
 	for (uint j = idx; j < size; j += stride)
 	{
-		if (abs(A[j] - B[j]) < 0.01)
-			*matches++;
+		if (abs(A[j] - B[j]) < 1e-5)
+			atomicAdd(matches, 1.0);
 	}
 }
 

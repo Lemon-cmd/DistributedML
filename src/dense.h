@@ -39,6 +39,8 @@ public:
 	{
 		assert(init_);
 
+		accuracy = H_.bin().compare(Y) / Y.shape.first;
+
 		dH_ *= ((-1.0 * H_ / Y + (1.0 - Y) / (1.0 - H_)));
 
 		return -(Y * H_.log() + (1.0 - Y) * (1.0 - H_).log()).sum() / Y.shape().first;
@@ -48,6 +50,7 @@ public:
 	{
 		assert(init_);
 		dH_ *= (H_ - Y);
+		accuracy = H_.compare(Y) / Y.size();
 
 		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / Y.shape().first;
 	}
@@ -57,6 +60,8 @@ public:
 		assert(init_);
 
 		dH_ = H_ - Y;
+
+		accuracy = H_.bin().compare(Y) / Y.shape.first;
 
 		return ((-1.0 * Y) * H_.log()).sum() / Y.shape().first;
 	}
