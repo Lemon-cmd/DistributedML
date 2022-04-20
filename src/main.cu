@@ -21,11 +21,14 @@ int main()
 	std::cout << X.compare(Y) << std::endl;
 	*/
 
-	std::vector<Matrix> images, labels;
-	load_mnist("../data/mnist-train-images", "../data/mnist-train-labels", 100, images, labels);
+	std::vector<Matrix> train_images, train_labels;
+	load_mnist("../data/train-images-idx3-ubyte", "../data/train-labels-idx1-ubyte", 100, images, labels);
 
-	std::cout << images.size() << '\n'
-			  << labels.size() << '\n';
+	std::vector<Matrix> test_images, test_labels;
+	load_mnist("../data/t10k-images-idx3-ubyte", "../data/t10k-labels-idx1-ubyte", 100, images, labels);
+
+	std::cout << train_images.size() << '\n'
+			  << train_labels.size() << '\n';
 
 	std::vector<float> data(30, 0.0);
 	data[8] = 1.0;
