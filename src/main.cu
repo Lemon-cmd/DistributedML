@@ -58,6 +58,9 @@ int main()
 			// random index
 			uint k = random_idx(0, train_images.size());
 
+			if (train_images[k].shape().first != 28 && train_images[k].shape().second != 28)
+				continue;
+
 			// std::cout << "k: " << k << std::endl;
 			// std::cout << train_images[k].shape() << ' '
 			//		  << train_labels[k].shape() << std::endl;
@@ -88,8 +91,8 @@ int main()
 			i++;
 		}
 
-		loss /= train_images.size();
-		acc /= train_images.size();
+		loss /= i;
+		acc /= i;
 
 		std::cout << "L: " << loss << " A: " << acc << std::endl;
 	}
