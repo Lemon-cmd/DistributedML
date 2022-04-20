@@ -392,7 +392,7 @@ Matrix Matrix::T() const
 {
     Matrix item(cols, rows);
 
-    cublas_transpose(dev_mat, item.dev_mat, rows, cols, handle);
+    cublas_transpose(dev_mat, item.dev_mat, rows, cols, item.handle);
     cudaDeviceSynchronize();
 
     return item;
@@ -659,19 +659,19 @@ void Matrix::sigmoid_()
     cudaDeviceSynchronize();
 }
 
-void Matrix::elu_(float alph = 1.0)
+void Matrix::elu_(float alph)
 {
     apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_elu, alph, this->size());
     cudaDeviceSynchronize();
 }
 
-void Matrix::sign_(float alph = 0.0)
+void Matrix::sign_(float alph)
 {
     apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sign, alph, this->size());
     cudaDeviceSynchronize();
 }
 
-void Matrix::relu_(float alph = 0.0)
+void Matrix::relu_(float alph)
 {
     apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_relu, alph, this->size());
     cudaDeviceSynchronize();
@@ -714,7 +714,7 @@ Matrix Matrix::sigmoid() const
 
     return item;
 }
-Matrix Matrix::elu(float alph = 1.0) const
+Matrix Matrix::elu(float alph) const
 {
     Matrix item(*this);
 
@@ -723,7 +723,7 @@ Matrix Matrix::elu(float alph = 1.0) const
 
     return item;
 }
-Matrix Matrix::sign(float alph = 0.0) const
+Matrix Matrix::sign(float alph) const
 {
     Matrix item(*this);
     apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_sign, alph, this->size());
@@ -731,7 +731,7 @@ Matrix Matrix::sign(float alph = 0.0) const
 
     return item;
 }
-Matrix Matrix::relu(float alph = 0.0) const
+Matrix Matrix::relu(float alph) const
 {
     Matrix item(*this);
     apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_relu, alph, this->size());
