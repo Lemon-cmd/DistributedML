@@ -26,8 +26,8 @@ float *char_to_int(char *val, int size)
 void load_mnist(const char *image_filename,
                 const char *label_filename,
                 size_t batch_size,
-                std::vector<Matrix> images,
-                std::vector<Matrix> labels)
+                std::vector<Matrix> &images,
+                std::vector<Matrix> &labels)
 {
     // Open files
     std::ifstream image_file(image_filename, std::ios::in | std::ios::binary);
@@ -100,6 +100,7 @@ void load_mnist(const char *image_filename,
         // read label
         label_file.read(&label, 1);
 
+        // if image is of a 7 then true
         if (label == 7)
             flabels[item_id] = 1.0;
         else
