@@ -21,11 +21,8 @@ int main()
 	std::cout << X.compare(Y) << std::endl;
 	*/
 
-	char *buff1 = "../data/mnist-train-images";
-	char *buff2 = "../data/mnist-train-labels";
-
 	std::vector<Matrix> images, labels;
-	load_mnist(buff1, buff2, 100, images, labels);
+	load_mnist("../data/mnist-train-images";, "../data/mnist-train-labels", 100, images, labels);
 
 	std::cout << images.size() << '\n'
 			  << labels.size() << '\n';
