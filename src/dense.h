@@ -62,7 +62,7 @@ public:
 	{
 		assert(init_);
 
-		dH_ = H_ - Y;
+		dH_ *= (-1.0 * Y / H_);
 
 		accuracy = H_.bin().compare(Y) / Y.shape().first;
 
@@ -77,7 +77,7 @@ private:
 	void init_weight()
 	{
 		B_.Constant(1.0);
-		W_.Uniform(-0.5, 0.5);
+		W_.Uniform(-0.2, 0.2);
 	}
 };
 
@@ -148,7 +148,7 @@ void Dense::update()
 	dW /= I_.shape().first;
 
 	// adam parameters
-	vw_ = 0.99 * vw_ + 0.01 * (dW.pow(2)).sum();
+	vw_ = 0.9 * vw_ + 0.1 * (dW.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk

@@ -100,6 +100,8 @@ protected:
 
 		Matrix denom = Z.dot(ones);
 		Z /= denom;
+
+		dZ = Z - Z.pow(2.0);
 	}
 
 	void SetActivation(std::function<void(Matrix &, Matrix &)> &func)
