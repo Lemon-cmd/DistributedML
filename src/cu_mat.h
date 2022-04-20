@@ -704,10 +704,8 @@ void Matrix::relu_(float alph)
 Matrix Matrix::log() const
 {
     Matrix item(*this);
-    int blocksize, gridsize;
-    cudaOccupancyMaxPotentialBlockSize(&gridsize, &blocksize, &apply_non_alph, 0, this->size);
 
-    apply_non_alph<float><<<gridsize, blocksize>>>(item.dev_mat, cu_log, this->size());
+    apply_non_alph<float><<<rows, cols>>>(item.dev_mat, cu_log, this->size());
     cudaDeviceSynchronize();
 
     return item;
