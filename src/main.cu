@@ -61,13 +61,13 @@ int main()
 		{
 			float acc_batch = 0.0;
 			// Forward pass
-			network[0].forward(X);
+			network[0].forward(train_images[k]);
 			for (uint j = 1; j < network.size(); j++)
 			{
 				network[j].forward(network[j - 1].Get_H());
 			}
 
-			loss += network.back().BCELoss(Y, acc_batch);
+			loss += network.back().BCELoss(train_labels[k], acc_batch);
 			acc += acc_batch;
 
 			// network.back().ToHost();
