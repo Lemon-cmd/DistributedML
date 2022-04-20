@@ -148,14 +148,14 @@ private:
 
     void allocDevFuncs()
     {
-        cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>));
-        cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>));
-        cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>)));
 
-        cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>));
-        cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>));
-        cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>));
-        cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>)));
     }
 
     void ModifyDevMat(const float *val, uint type = 0)
@@ -660,7 +660,7 @@ void Matrix::log_()
 void Matrix::exp_()
 {
     apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
-    // cudaAssert(cudaDeviceSynchronize());
+    cudaAssert(cudaDeviceSynchronize());
 }
 
 void Matrix::tanh_()
@@ -708,7 +708,7 @@ Matrix Matrix::exp() const
     Matrix item(*this);
 
     apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_exp, this->size());
-    // cudaAssert(cudaDeviceSynchronize());
+    cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
