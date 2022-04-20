@@ -33,16 +33,16 @@ int main()
 
 	std::cout << "Init:\n";
 
-	network[0] = Dense(30, "relu", 0.01);
+	network[0] = Dense(30, "elu", 0.01);
 	network[0].init(28 * 28);
 
 	for (uint j = 1; j < network.size() - 1; j++)
 	{
-		network[j] = Dense(50, "tanh", 0.1);
+		network[j] = Dense(50, "tanh", 0.01);
 		network[j].init(network[j - 1].OutShape());
 	}
 
-	network.back() = Dense(1, "sigmoid", 0.001);
+	network.back() = Dense(28 * 28, "relu", 0.001);
 	network.back().init(network[network.size() - 2].OutShape());
 
 	std::cout << "Training:\n";
