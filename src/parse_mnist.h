@@ -114,8 +114,14 @@ void load_mnist(const char *image_filename,
 
     /* Partition Data */
 
+    size_t counter = 1;
+    size_t partitions = num_items / batch_size;
+
     for (uint j = 0; j < num_items; j += batch_size)
     {
+        if (counter == partitions)
+            break;
+
         std::vector<float> lab_slice(flabels.begin() + j, flabels.begin() + j + batch_size);
 
         std::vector<float> slice_data;
@@ -134,6 +140,8 @@ void load_mnist(const char *image_filename,
 
         images.push_back(X);
         labels.push_back(Y);
+
+        counter++;
     }
 }
 

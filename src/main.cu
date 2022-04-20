@@ -19,12 +19,12 @@ int main()
 	std::vector<Matrix> train_images, train_labels;
 	load_mnist("../data/train-images-idx3-ubyte",
 			   "../data/train-labels-idx1-ubyte",
-			   100, train_images, train_labels);
+			   128, train_images, train_labels);
 
 	std::vector<Matrix> test_images, test_labels;
 	load_mnist("../data/t10k-images-idx3-ubyte",
 			   "../data/t10k-labels-idx1-ubyte",
-			   100, test_images, test_labels);
+			   128, test_images, test_labels);
 
 	std::cout << train_images.size() << '\n'
 			  << train_labels.size() << '\n';
@@ -57,9 +57,10 @@ int main()
 		{
 			// random index
 			uint k = random_idx(0, train_images.size());
-			std::cout << "k: " << k << std::endl;
-			std::cout << train_images[k].shape() << ' '
-					  << train_labels[k].shape() << std::endl;
+
+			// std::cout << "k: " << k << std::endl;
+			// std::cout << train_images[k].shape() << ' '
+			//		  << train_labels[k].shape() << std::endl;
 
 			float acc_batch = 0.0;
 			// Forward pass
