@@ -55,7 +55,7 @@ int main()
 
 	for (uint e = 0; e < epochs; e++)
 	{
-		float loss, acc = 0.0, 0.0;
+		float loss = 0.0, acc = 0.0;
 
 		for (uint k = 0; k < train_images.size(); k++)
 		{
