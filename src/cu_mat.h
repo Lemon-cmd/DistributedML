@@ -64,7 +64,7 @@ public:
     void tanh_();
     void sigmoid_();
     void elu_(float alph = 1.0);
-    void Sign_(float alph = 0.0);
+    void sign_(float alph = 0.0);
     void relu_(float alph = 0.0);
 
     Matrix log() const;
@@ -72,7 +72,7 @@ public:
     Matrix tanh() const;
     Matrix sigmoid() const;
     Matrix elu(float alph = 1.0) const;
-    Matrix Sign(float alph = 0.0) const;
+    Matrix sign(float alph = 0.0) const;
     Matrix relu(float alph = 0.0) const;
 
     /*
@@ -666,7 +666,7 @@ void Matrix::elu_(float alph)
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::Sign_(float alph)
+void Matrix::sign_(float alph)
 {
     sign_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
@@ -724,7 +724,7 @@ Matrix Matrix::elu(float alph) const
 
     return item;
 }
-Matrix Matrix::Sign(float alph) const
+Matrix Matrix::sign(float alph) const
 {
     Matrix item(*this);
     sign_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, alph, this->size());

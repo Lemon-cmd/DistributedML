@@ -148,26 +148,14 @@ void Dense::forward(const Matrix &X)
 {
 	assert(init_);
 
-	std::cout << X.shape() << '\n'
-			  << ones_.shape() << '\n'
-			  << W_.shape() << '\n'
-			  << B_.shape() << '\n';
-
 	// m x d * d x dk + m x 1 * 1 x dk
-	H_ = X % W_ + ones_ % B_;
-	std::cout << "Got H\n";
+	H_ = X.dot(W_) + ones_.dot(B_);
 
 	dH_ = H_;
 
-	std::cout << "Init dH\n";
-
 	func_(H_, dH_);
 
-	std::cout << "Activate\n";
-
 	I_ = X;
-
-	std::cout << "Done\n";
 }
 
 void Dense::update()
@@ -180,7 +168,6 @@ void Dense::update()
 
 	// d x m * m x dk -> d x dk
 	dW = I_ % dH_;
-	dW.pow(2.0);
 
 	// M x 1 -> 1 x M
 	ones_.T();
@@ -193,8 +180,8 @@ void Dense::update()
 	ones_ /= (float)dH_.shape().first;
 
 	// adam parameters
-	vw_ = 0.1 * vw_ + 0.9 * (dW * dW).sum();
-	vb_ = 0.1 * vb_ + 0.9 * (ones_ * ones_).sum();
+	vw_ = 0.1 * vw_ + 0.9 * (dW.pow(2)).sum();
+	vb_ = 0.1 * vb_ + 0.9 * (ones_.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk

@@ -54,21 +54,18 @@ protected:
 	void Identity2d(Matrix &Z, Matrix &dZ)
 	{
 		dZ.Constant(1.0);
-
-		if (cuda_)
-			dZ.ToDevice();
 	}
 
 	void Tanh2d(Matrix &Z, Matrix &dZ)
 	{
-		Z.Tanh();
-		dZ = 1.0 - Z.power(2.0);
+		Z.tanh_();
+		dZ = 1.0 - Z.pow(2.0);
 	}
 
 	void Sigmoid2d(Matrix &Z, Matrix &dZ)
 	{
-		Z.Sigmoid();
-		dZ = Z - Z.power(2.0);
+		Z.sigmoid_();
+		dZ = Z - Z.pow(2.0);
 	}
 
 	void eLU2d(Matrix &Z, Matrix &dZ)
@@ -77,9 +74,9 @@ protected:
 		Matrix tmp = Z;
 		tmp *= -1.0;
 
-		dZ.Sign();
-		tmp.Sign();
-		Z.Elu(1.0);
+		dZ.sign_();
+		tmp.sign_();
+		Z.elu_(1.0);
 
 		tmp *= Z;
 		dZ += tmp;
@@ -87,22 +84,19 @@ protected:
 
 	void ReLU2d(Matrix &Z, Matrix &dZ)
 	{
-		Z.Relu(0.0);
+		Z.relu_(0.0);
 		dZ = Z;
-		dZ.Sign(0.0);
+		dZ.sign_(0.0);
 	}
 
 	void Softmax2d(Matrix &Z, Matrix &dZ)
 	{
-		Matrix ones_cols(Z.shape().second, Z.shape().second);
-		ones_cols.Constant(1.0);
-
-		if (cuda_)
-			ones_cols.ToDevice();
+		Matrix ones(Z.shape().second, Z.shape().second);
+		ones.Constant(1.0);
 
 		Z.Exp();
 
-		Matrix denom = Z % ones_cols;
+		Matrix denom = Z.dot(ones_cols);
 		Z /= denom;
 	}
 
