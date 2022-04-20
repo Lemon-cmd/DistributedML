@@ -33,14 +33,86 @@ public:
     void Constant(float val);
     void Uniform(float min, float max);
 
+    // set points > threshold to 1 else 0;
+    void bin_();
+    Matrix bin() const;
+
+    /* Transpose */
+    void T_();        // transpose in-place
+    Matrix T() const; // transpose and return
+
+    /* Sum */
+    float sum() const;
+
+    /* Power Function */
+    void pow_(float val);
+    Matrix pow(float val) const;
+
+    /* Matrix Multiplication */
+    void dot_(const Matrix &val);        // matrix mult in-place
+    Matrix dot(const Matrix &val) const; // matrix mult and return
+
+    /*
+     *
+     * Special Math Functions
+     *
+     *
+     */
+
+    void log_();
+    void exp_();
+    void tanh_();
+    void sigmoid_();
+    void elu_(float alph = 1.0);
+    void sign_(float alph = 0.0);
+    void relu_(float alph = 0.0);
+
+    Matrix log() const;
+    Matrix exp() const;
+    Matrix tanh() const;
+    Matrix sigmoid() const;
+    Matrix elu(float alph = 1.0) const;
+    Matrix sign(float alph = 0.0) const;
+    Matrix relu(float alph = 0.0) const;
+
+    /*
+     *
+     * In-place Operators
+     *
+     * */
+
+    void operator*=(float val);
+    void operator+=(float val);
+    void operator-=(float val);
+    void operator/=(float val);
+
+    void operator=(const Matrix &val);
+    void operator*=(const Matrix &val);
+    void operator+=(const Matrix &val);
+    void operator-=(const Matrix &val);
+    void operator/=(const Matrix &val);
+
+    /*
+     *
+     * Non In-place Operators
+     *
+     * */
+
+    Matrix operator-(float val) const;
+    Matrix operator+(float val) const;
+    Matrix operator/(float val) const;
+    Matrix operator*(float val) const;
+
+    Matrix operator+(const Matrix &val) const;
+    Matrix operator-(const Matrix &val) const;
+    Matrix operator/(const Matrix &val) const;
+    Matrix operator*(const Matrix &val) const;
+
     /* Return array on the gpu */
     float *DevData() const { return dev_mat; }
 
     /* Return Eigen::MatrixXf */
-    const Tensor2d &HostData() const
-    {
-        return host_mat;
-    }
+    const Tensor2d &HostData() const { return host_mat; }
 
     /* Return size of matrix */
     size_t size() const { return rows * cols; }
@@ -251,6 +323,421 @@ void Matrix::Uniform(float min, float max)
     host_mat = Tensor2d::NullaryExpr(rows, cols, [&, this]()
                                      { return this->randint(min, max); });
     ToDevice();
+}
+
+/*
+ *
+ *
+ *
+ * -------------- Math Functions --------------
+ *
+ *
+ *
+ *  */
+
+/* Sum */
+float Matrix::sum() const
+{
+    float *d_ones, mat_sum = 0;
+    Tensor2d ones = Tensor2d::Constant(rows, cols, 1.0);
+
+    cudaAssert(cudaMalloc(&d_ones, bytes()));
+
+    cudaAssert(cudaMemcpy(d_ones, ones.data(), bytes(),
+                          cudaMemcpyHostToDevice));
+
+    cublasAssert(cublasSdot(handle, size(), dev_mat,
+                            1, d_ones, 1, &mat_sum));
+
+    cudaAssert(cudaFree(d_ones));
+
+    return mat_sum;
+}
+
+// set points > threshold to 1 else 0;
+void Matrix::bin_()
+{
+    float threshold = this->sum() / size() + 0.07f;
+    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, threshold, this->size());
+    cudaDeviceSynchronize();
+}
+
+Matrix Matrix::bin() const
+{
+    Matrix item(*this);
+
+    float threshold = this->sum() / size() + 0.07f;
+    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, threshold, this->size());
+
+    return item;
+}
+
+// transpose in place
+void Matrix::T_()
+{
+    float *new_mat;
+    cudaAssert(cudaMalloc(&new_mat, bytes()));
+    cudaAssert(cudaMemset(new_mat, 0.0, bytes()));
+
+    cublas_transpose(dev_mat, new_mat, rows, cols, handle);
+    cudaDeviceSynchronize();
+
+    cudaAssert(cudaFree(dev_mat));
+    dev_mat = new_mat;
+
+    std::swap(rows, cols);
+}
+
+Matrix Matrix::T() const
+{
+    Matrix item(cols, rows);
+
+    cublas_transpose(dev_mat, item.dev_mat, rows, cols, handle);
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+/* Power Function */
+void Matrix::pow_(float val)
+{
+    pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+}
+
+Matrix Matrix::pow(float val) const
+{
+    Matrix item(*this);
+
+    pow_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+/* Matrix Multiplication */
+void Matrix::dot_(const Matrix &val)
+{
+    assert(cols == val.rows);
+
+    cols = val.cols;
+
+    float *new_mat;
+    cudaAssert(cudaMalloc(&new_mat, bytes()));
+    cudaAssert(cudaMemset(new_mat, 0.0, bytes()));
+
+    cublas_mat_mult(dev_mat, val.dev_mat, new_mat,
+                    rows, val.rows, val.cols, handle);
+
+    cudaDeviceSynchronize();
+
+    cudaAssert(cudaFree(dev_mat));
+    dev_mat = new_mat;
+}
+
+Matrix Matrix::dot(const Matrix &val) const
+{
+    assert(cols == val.rows);
+
+    Matrix item(rows, val.cols);
+    cublas_mat_mult(dev_mat, val.dev_mat, item.dev_mat, rows, val.rows, val.cols, item.handle);
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+/*
+ *
+ *
+ * -------------- In-place Matrix Operators --------------
+ *
+ *
+ *  */
+
+void Matrix::operator=(const Matrix &val)
+{
+    Matrix(val);
+}
+
+void Matrix::operator+=(const Matrix &val)
+{
+    assert(val.rows == rows && val.cols == cols);
+
+    add_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::operator-=(const Matrix &val)
+{
+    assert(val.rows == rows && val.cols == cols);
+
+    minus_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::operator*=(const Matrix &val)
+{
+    assert(val.rows == rows && val.cols == cols);
+
+    mult_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::operator/=(const Matrix &val)
+{
+    div_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+}
+
+/*
+ *
+ *
+ * -------------- Non- In-place Matrix Operators --------------
+ *
+ *
+ *  */
+
+Matrix Matrix::operator+(const Matrix &val) const
+{
+    assert(val.rows == rows && val.cols == cols);
+    Matrix item(*this);
+
+    add_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::operator-(const Matrix &val) const
+{
+    assert(val.rows == rows && val.cols == cols);
+    Matrix item(*this);
+
+    minus_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::operator*(const Matrix &val) const
+{
+    assert(val.rows == rows && val.cols == cols);
+    Matrix item(*this);
+
+    mult_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::operator/(const Matrix &val) const
+{
+    assert(val.rows == rows && val.cols == cols);
+
+    Matrix item(*this);
+
+    div_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val.dev_mat, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+/*
+ *
+ *
+ *
+ * -------------- Single Value Matrix Operators --------------
+ *
+ *
+ *
+ *  */
+
+void Matrix::operator+=(float val)
+{
+
+    add_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::operator-=(float val)
+{
+
+    minus_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::operator*=(float val)
+{
+
+    mult_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::operator/=(float val)
+{
+
+    div_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+}
+
+Matrix Matrix::operator+(float val) const
+{
+    Matrix item(rows, cols);
+
+    item.ModifyDevMat(dev_mat, 1);
+
+    add_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::operator-(float val) const
+{
+    Matrix item(rows, cols);
+
+    item.ModifyDevMat(dev_mat, 1);
+
+    minus_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::operator*(float val) const
+{
+    Matrix item(rows, cols);
+
+    item.ModifyDevMat(dev_mat, 1);
+
+    mult_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::operator/(float val) const
+{
+    Matrix item(rows, cols);
+
+    item.ModifyDevMat(dev_mat, 1);
+
+    div_arr_val<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, val, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+/*
+ *
+ * Special Math Functions
+ *
+ *
+ */
+
+void Matrix::log_()
+{
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_log, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::exp_()
+{
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::tanh_()
+{
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_tanh, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::sigmoid_()
+{
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sigmoid, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::elu_(float alph = 1.0)
+{
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_elu, alph, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::sign_(float alph = 0.0)
+{
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sign, alph, this->size());
+    cudaDeviceSynchronize();
+}
+
+void Matrix::relu_(float alph = 0.0)
+{
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_relu, alph, this->size());
+    cudaDeviceSynchronize();
+}
+
+Matrix Matrix::log() const
+{
+    Matrix item(*this);
+
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_log, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+
+Matrix Matrix::exp() const
+{
+    Matrix item(*this);
+
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_exp, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+Matrix Matrix::tanh() const
+{
+    Matrix item(*this);
+
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_tanh, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+Matrix Matrix::sigmoid() const
+{
+    Matrix item(*this);
+
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_sigmoid, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+Matrix Matrix::elu(float alph = 1.0) const
+{
+    Matrix item(*this);
+
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_elu, alph, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+Matrix Matrix::sign(float alph = 0.0) const
+{
+    Matrix item(*this);
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_sign, alph, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
+}
+Matrix Matrix::relu(float alph = 0.0) const
+{
+    Matrix item(*this);
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_relu, alph, this->size());
+    cudaDeviceSynchronize();
+
+    return item;
 }
 
 #endif
