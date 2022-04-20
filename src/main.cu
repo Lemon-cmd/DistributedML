@@ -33,7 +33,7 @@ int main()
 
 	float accuracy = 0.0;
 
-	Matrix X(100, 5), Y(100, 10);
+	Matrix X(3, 5), Y(3, 10);
 	X.Random();
 	Y.Constant(1);
 
@@ -41,16 +41,16 @@ int main()
 
 	std::cout << "Init:\n";
 
-	network[0] = Dense(100, "identity");
+	network[0] = Dense(3, "relu");
 	network[0].init(5);
 
 	for (uint j = 1; j < network.size() - 1; j++)
 	{
-		network[j] = Dense(100 - j, "identity");
+		network[j] = Dense(3, "sigmoid");
 		network[j].init(network[j - 1].OutShape());
 	}
 
-	network.back() = Dense(10, "softmax");
+	network.back() = Dense(10, "tanh");
 	network.back().init(network[network.size() - 2].OutShape());
 
 	std::cout << "Training:\n";
@@ -68,18 +68,18 @@ int main()
 		float loss = network.back().MSELoss(Y, accuracy);
 		std::cout << "L: " << loss << std::endl;
 
+		network.back().ToHost();
+		std::cout << "H: " << network.back().Get_H() << "\n\n";
+
 		// Update
 		network.back().update();
 
-		for (uint j = network.size() - 2; j >= 0; j--)
+		for (int j = network.size() - 2; j >= 0; j--)
 		{
 			network[j].set_delta(network[j + 1].Get_delta());
 			network[j].update();
 		}
 	}
-
-	network.back().ToHost();
-	std::cout << network.back().Get_H() << '\n';
 
 	return 0;
 }
