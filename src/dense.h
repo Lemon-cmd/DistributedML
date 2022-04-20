@@ -142,8 +142,8 @@ void Dense::update()
 	ones_ /= dH_.shape().first;
 
 	// adam parameters
-	vw_ = 0.99 * vw_ + 0.01 * (dW.pow(2)).sum();
-	vb_ = 0.99 * vb_ + 0.01 * (ones_.pow(2)).sum();
+	vw_ = 0.1 * vw_ + 0.9 * (dW.pow(2)).sum();
+	vb_ = 0.1 * vb_ + 0.9 * (ones_.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk
