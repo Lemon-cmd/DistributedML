@@ -140,12 +140,6 @@ private:
 
     func_alph<float> cu_elu, cu_sign, cu_relu;
 
-    void init_mat()
-    {
-        host_mat = Tensor2d::Zero(rows, cols);
-        ToDevice();
-    }
-
     void allocDevFuncs()
     {
         cudaAssert(cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>)));
@@ -189,7 +183,6 @@ private:
             cuda = true;
             cublasAssert(cublasCreate(&handle));
             cudaAssert(cudaMalloc(&dev_mat, bytes()));
-            cudaAssert(cudaMemset(dev_mat, 0, bytes()));
             cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice));
         }
 
@@ -197,6 +190,12 @@ private:
         {
             ModifyDevMat(host_mat.data(), 0);
         }
+    }
+
+    void init_mat()
+    {
+        host_mat = Tensor2d::Zero(rows, cols);
+        ToDevice();
     }
 
     float randint(float min, float max) const

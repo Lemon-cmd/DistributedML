@@ -4,7 +4,7 @@
 
 int main()
 {
-	cudaSetDevice(0);
+	// cudaSetDevice(0);
 
 	Matrix X(3, 1), Y(3, 1);
 
