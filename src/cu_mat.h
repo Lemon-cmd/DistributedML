@@ -369,7 +369,7 @@ float Matrix::compare(const Matrix &val) const
     cudaAssert(cudaMalloc(&d_acc, sizeof(float)));
     cudaAssert(cudaMemcpy(d_acc, &h_acc, sizeof(float), cudaMemcpyHostToDevice));
 
-    match_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, d_acc, this->size());
+    match_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, 1>>>(dev_mat, val.dev_mat, d_acc, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     cudaAssert(cudaMemcpy(&h_acc, d_acc, sizeof(float), cudaMemcpyDeviceToHost));
