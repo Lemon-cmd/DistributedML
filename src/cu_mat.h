@@ -162,18 +162,18 @@ private:
     {
         // free Dev Mat
         cudaAssert(cudaFree(dev_mat));
+        cudaAssert(cudaMalloc(&dev_mat, bytes()));
+        cudaAssert(cudaMemset(dev_mat, 0, bytes()));
 
         // host to dev
         if (type == 0)
         {
-            cudaAssert(cudaMalloc(&dev_mat, bytes()));
             cudaAssert(cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyHostToDevice));
         }
 
         // dev to dev
         else if (type == 1)
         {
-            cudaAssert(cudaMalloc(&dev_mat, bytes()));
             cudaAssert(cudaMemcpy(dev_mat, val, bytes(), cudaMemcpyDeviceToDevice));
         }
         else
@@ -281,10 +281,9 @@ Matrix::Matrix(const Shape &shape)
 
 Matrix::Matrix(const Matrix &val)
 {
-    host_mat = val.host_mat;
     rows = val.rows, cols = val.cols;
 
-    ToDevice();
+    init_mat();
     ModifyDevMat(val.dev_mat, 1);
 }
 
