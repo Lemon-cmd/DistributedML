@@ -34,6 +34,7 @@ public:
 	virtual size_t OutShape() { return out_dim_; }
 
 	virtual float MSELoss(const Matrix &Y, float &accuracy) { return 0; }
+	virtual float BCELoss(const Matrix &Y, float &accuracy) { return 0; }
 	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) { return 0; }
 
 protected:

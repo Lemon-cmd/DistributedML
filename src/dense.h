@@ -35,6 +35,15 @@ public:
 
 	void set_delta(const Matrix &delta) { dH_ *= delta; }
 
+	float BCELoss(const Matrix &Y, float &accuracy) override
+	{
+		assert(init_);
+
+		dH_ *= ((-H_ / Y + (1.0 - Y) / (1.0 - H)));
+
+		return -(Y * H_.log() + (1.0 - Y) * (1.0 - H_).log()).sum() / Y.shape().first;
+	}
+
 	float MSELoss(const Matrix &Y, float &accuracy) override
 	{
 		assert(init_);

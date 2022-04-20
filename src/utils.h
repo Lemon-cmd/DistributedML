@@ -287,7 +287,10 @@ __global__ void div_arr(T *A, const T *B, const size_t size)
 
 	for (uint j = idx; j < size; j += stride)
 	{
-		A[j] = A[j] / B[j];
+		if (B[j] > 0)
+			A[j] = A[j] / B[j];
+		else
+			A[j] = 0;
 	}
 }
 

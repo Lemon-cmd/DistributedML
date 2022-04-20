@@ -68,6 +68,9 @@ int main()
 		float loss = network.back().MSELoss(Y, accuracy);
 		std::cout << "L: " << loss << std::endl;
 
+		network.back().ToHost();
+		std::cout << "H: " << network.back().Get_H() << std::endl;
+
 		// Update
 		network.back().update();
 
