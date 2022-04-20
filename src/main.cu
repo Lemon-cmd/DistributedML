@@ -4,24 +4,27 @@
 #include "clockcycle.h"
 #include "parse_mnist.h"
 
-uint random_idx(int min, int max)
+int random_idx(int min, int max)
 {
-	return rand() % (max - min + 1) + min;
+	std::random_device rd;	// Will be used to obtain a seed for the random number engine
+	std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+	std::uniform_int_distribution<> distrib(min, max);
+
+	return distrib(gen);
 }
 
 int main()
 {
-	srand(time(NULL));
 
 	std::vector<Matrix> train_images, train_labels;
 	load_mnist("../data/train-images-idx3-ubyte",
 			   "../data/train-labels-idx1-ubyte",
-			   128, train_images, train_labels);
+			   100, train_images, train_labels);
 
 	std::vector<Matrix> test_images, test_labels;
 	load_mnist("../data/t10k-images-idx3-ubyte",
 			   "../data/t10k-labels-idx1-ubyte",
-			   128, test_images, test_labels);
+			   100, test_images, test_labels);
 
 	std::cout << train_images.size() << '\n'
 			  << train_labels.size() << '\n';
