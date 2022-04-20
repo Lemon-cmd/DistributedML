@@ -456,7 +456,7 @@ Matrix Matrix::dot(const Matrix &val) const
 
 void Matrix::operator=(const Matrix &val)
 {
-    Matrix(val);
+    *this = Matrix(val);
 }
 
 void Matrix::operator+=(const Matrix &val)
