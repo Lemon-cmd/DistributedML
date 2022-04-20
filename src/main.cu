@@ -17,8 +17,8 @@ int main()
 	std::cout << X << '\n';
 	std::cout << Y << '\n';
 
-	X = X.log();
-	Y = Y.log();
+	X = X.Log();
+	Y = Y.Log();
 
 	X.ToHost();
 	Y.ToHost();
