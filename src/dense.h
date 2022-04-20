@@ -39,38 +39,23 @@ public:
 	float MSELoss(const Matrix &Y, float &accuracy) override
 	{
 		assert(init_);
+		dH_ *= (H_ - Y);
 
-		dH_ = dH_ * (H_ - Y);
-		return sqrtf((H_ - Y).power(2.0).sum());
+		return sqrtf((H_ - Y).pow(2.0).sum()) / H.shape().first;
 	}
 
 	float CrossEntropyLoss(const Matrix &Y, float &accuracy) override
 	{
 		assert(init_);
 
-		std::cout << "Fail\n";
 		dH_ = H_ - Y;
-		std::cout << "Fail?\n";
 
-		J_ = H_;
-		J_.Log();
-		J_.ToHost();
-
-		std::cout << "Fail??\n";
-		J_ *= (-1.0);
-		J_.ToHost();
-
-		std::cout << "Fail???\n";
-		J_ *= Y;
-
-		std::cout << "Fail????\n";
-
-		return J_.sum();
+		return (-1.0 * (Y * H.log())).sum() / H.shape().first;
 	}
 
 private:
 	float vw_, vb_;
-	Matrix W_, B_, H_, dH_, lgrad_, I_, ones_, J_;
+	Matrix W_, B_, H_, dH_, lgrad_, I_, ones_;
 	std::function<void(Matrix &, Matrix &)> func_;
 
 	void init_weight()
@@ -106,6 +91,7 @@ void Dense::init(size_t in_dim)
 	assert(!init_);
 
 	init_ = true;
+
 	W_ = Matrix(in_dim,
 				out_dim_);
 
@@ -117,8 +103,6 @@ void Dense::init(size_t in_dim)
 void Dense::init(size_t batch_dim, size_t in_dim)
 {
 	init(in_dim);
-	ones_ = Matrix(batch_dim, 1);
-	ones_.ToDevice();
 }
 
 void Dense::ToHost()
@@ -147,9 +131,10 @@ void Dense::ToDevice()
 void Dense::forward(const Matrix &X)
 {
 	assert(init_);
+	ones_ = Matrix(X.shape().first, 1);
 
 	// m x d * d x dk + m x 1 * 1 x dk
-	H_ = X.dot(W_) + ones_.dot(B_);
+	H_ = X.dot(W_) + ones.dot(B_);
 
 	dH_ = H_;
 
@@ -163,21 +148,21 @@ void Dense::update()
 	assert(init_);
 
 	static Matrix dW;
-	// d x m
-	I_.T();
+	// m x d -> d x m
+	I_.T_();
 
 	// d x m * m x dk -> d x dk
-	dW = I_ % dH_;
+	dW = I_.dot(dH_);
 
 	// M x 1 -> 1 x M
-	ones_.T();
+	ones_.T_();
 
 	// let ones now be the gradient w.r.t Bias
 	// (1 x M) * (M x dk) -> (1 x dK)
-	ones_.dot(dH_); // sum
+	ones_.dot_(dH_); // sum
 
 	// average
-	ones_ /= (float)dH_.shape().first;
+	ones_ /= dH_.shape().first;
 
 	// adam parameters
 	vw_ = 0.1 * vw_ + 0.9 * (dW.pow(2)).sum();
@@ -186,7 +171,7 @@ void Dense::update()
 	// W : dk x d
 	// dH : m x dk
 	// lgrad : m x d
-	lgrad_ = dH_ % W_.transpose();
+	lgrad_ = dH_.dot(W_.T());
 
 	dW *= (lr_ / sqrtf(vw_ + er_));
 	ones_ *= (lr_ / sqrtf(vb_ + er_));
