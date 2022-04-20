@@ -39,7 +39,7 @@ public:
 	{
 		assert(init_);
 
-		dH_ *= ((-H_ / Y + (1.0 - Y) / (1.0 - H_)));
+		dH_ *= ((-1.0 * H_ / Y + (1.0 - Y) / (1.0 - H_)));
 
 		return -(Y * H_.log() + (1.0 - Y) * (1.0 - H_).log()).sum() / Y.shape().first;
 	}
