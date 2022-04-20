@@ -94,7 +94,7 @@ void load_mnist(const char *image_filename,
 
         for (uint j = 0; j < rows * cols; j++)
         {
-            fpixels[item_id][j] = stof(pixels[j]);
+            fpixels[item_id][j] = pixels[j];
         }
 
         // read label
