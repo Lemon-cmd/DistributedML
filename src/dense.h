@@ -39,7 +39,7 @@ public:
 	{
 		assert(init_);
 
-		accuracy = H_.compare(Y) / Y.shape().first;
+		accuracy = H_.bin().compare(Y) / Y.shape().first;
 
 		dH_ *= ((-1.0 * H_ / Y + (1.0 - Y) / (1.0 - H_)));
 
@@ -63,7 +63,7 @@ public:
 
 		dH_ = H_ - Y;
 
-		accuracy = H_.compare(Y) / Y.shape().first;
+		accuracy = H_.bin().compare(Y) / Y.shape().first;
 
 		return ((-1.0 * Y) * H_.log()).sum() / Y.shape().first;
 	}

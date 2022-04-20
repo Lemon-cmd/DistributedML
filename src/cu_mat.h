@@ -381,8 +381,7 @@ float Matrix::compare(const Matrix &val) const
 // set points > threshold to 1 else 0;
 void Matrix::bin_()
 {
-    float threshold = this->sum() / size() + 0.07f;
-    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, threshold, this->size());
+    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, 0.4, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
@@ -390,8 +389,7 @@ Matrix Matrix::bin() const
 {
     Matrix item(*this);
 
-    float threshold = this->sum() / size() + 0.07f;
-    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, threshold, this->size());
+    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, 0.4, this->size());
 
     return item;
 }
