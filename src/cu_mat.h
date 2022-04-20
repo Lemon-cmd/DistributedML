@@ -189,6 +189,7 @@ private:
             cuda = true;
             cublasAssert(cublasCreate(&handle));
             cudaAssert(cudaMalloc(&dev_mat, bytes()));
+            cudaAssert(cudaMemset(dev_mat, 0, bytes()));
             cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice));
         }
 
@@ -659,7 +660,7 @@ void Matrix::log_()
 void Matrix::exp_()
 {
     apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
-    cudaAssert(cudaDeviceSynchronize());
+    // cudaAssert(cudaDeviceSynchronize());
 }
 
 void Matrix::tanh_()
@@ -696,7 +697,7 @@ Matrix Matrix::log() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<1, 1>>>(item.dev_mat, cu_log, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_log, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
@@ -707,7 +708,7 @@ Matrix Matrix::exp() const
     Matrix item(*this);
 
     apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_exp, this->size());
-    cudaAssert(cudaDeviceSynchronize());
+    // cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
