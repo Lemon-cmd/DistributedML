@@ -49,7 +49,9 @@ public:
 	float MSELoss(const Matrix &Y, float &accuracy) override
 	{
 		assert(init_);
+
 		dH_ *= (H_ - Y);
+
 		accuracy = H_.compare(Y) / Y.size();
 
 		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / Y.shape().first;
@@ -145,7 +147,7 @@ void Dense::update()
 	dW /= I_.shape().first;
 
 	// adam parameters
-	vw_ = 0.99 * vw_ + 0.01 * (dW.pow(2)).sum();
+	vw_ = 0.01 * vw_ + 0.99 * (dW.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk
