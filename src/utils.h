@@ -64,6 +64,19 @@ void cublas_mat_mult(const float *A, const float *B, float *C,
 }
 
 template <typename T>
+__global__ void match_arr(const T *A, const T *B, T *matches, const size_t size)
+{
+	const uint stride = blockDim.x * gridDim.x;
+	const uint idx = threadIdx.x + blockDim.x * blockIdx.x;
+
+	for (uint j = idx; j < size; j += stride)
+	{
+		if (abs(A[j] - B[j]) < 1e-5)
+			matches++;
+	}
+}
+
+template <typename T>
 __global__ void exp_arr(T *A, const size_t size)
 {
 	const uint stride = blockDim.x * gridDim.x;

@@ -49,7 +49,7 @@ public:
 
 		dH_ = H_ - Y;
 
-		return (-1.0 * (Y * H_.log())).sum() / H_.shape().first;
+		return ((-1.0 * Y) * H_.log()).sum() / H_.shape().first;
 	}
 
 private:

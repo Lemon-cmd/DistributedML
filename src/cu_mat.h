@@ -43,6 +43,7 @@ public:
 
     /* Sum */
     float sum() const;
+    float compare(const Matrix &val) const;
 
     /* Power Function */
     void pow_(float val);
@@ -359,6 +360,20 @@ float Matrix::sum() const
     cudaAssert(cudaFree(d_ones));
 
     return mat_sum;
+}
+
+/* Return the number of matched items */
+float Matrix::compare(const Matrix &val) const
+{
+    float h_acc = 0, *d_acc;
+    cudaAssert(cudaMalloc(&d_acc, sizeof(float)));
+
+    bin_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, val.dev_mat, h_acc, this->size());
+
+    cudaAssert(cudaMemcpy(h_acc, d_acc, sizeof(float), cudaMemcpyDeviceToHost));
+    cudaAssert(cudaFree(d_acc));
+
+    return h_acc;
 }
 
 // set points > threshold to 1 else 0;

@@ -50,7 +50,7 @@ int main()
 		network[j].init(network[j - 1].OutShape());
 	}
 
-	network.back() = Dense(10, "tanh");
+	network.back() = Dense(10, "relu");
 	network.back().init(network[network.size() - 2].OutShape());
 
 	std::cout << "Training:\n";
@@ -68,9 +68,6 @@ int main()
 		float loss = network.back().MSELoss(Y, accuracy);
 		std::cout << "L: " << loss << std::endl;
 
-		network.back().ToHost();
-		std::cout << "H: " << network.back().Get_H() << "\n\n";
-
 		// Update
 		network.back().update();
 
@@ -80,6 +77,12 @@ int main()
 			network[j].update();
 		}
 	}
+
+	Matrix A(3, 1), B(3, 1);
+	A.Constant(1.0);
+	B.Constant(1.0);
+
+	std::cout << A.compare(B) << std::endl;
 
 	return 0;
 }
