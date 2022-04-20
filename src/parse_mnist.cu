@@ -132,16 +132,22 @@ void load_mnist(const char *image_filename,
         Matrix X(batch_size, rows * cols, slice_data);
 
         images.push_back(X);
-
         labels.push_back(Y);
     }
+
+    std::cout << "Partitions: " << num_items / batch_size << std::endl;
 }
 
 int main()
 {
     char *buff1 = "../data/mnist-train-images";
     char *buff2 = "../data/mnist-train-labels";
-    load_mnist(buff1, buff2, 100);
+
+    std::vector<Matrix> images, labels;
+    load_mnist(buff1, buff2, 100, images, labels);
+
+    std::cout << images.size() << '\n'
+              << labels.size() << '\n';
 }
 
 #endif
