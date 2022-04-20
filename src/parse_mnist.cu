@@ -27,7 +27,7 @@ void load_mnist(const char *image_filename,
                 const char *label_filename,
                 size_t batch_size,
                 std::vector<Matrix> images,
-                std::vector<Matrix> labels, )
+                std::vector<Matrix> labels)
 {
     // Open files
     std::ifstream image_file(image_filename, std::ios::in | std::ios::binary);
@@ -85,7 +85,7 @@ void load_mnist(const char *image_filename,
     std::vector<std::vector<float>> fpixels(num_items,
                                             std::vector<float>(rows * cols, 0.0));
 
-    std::vector<std::vector<float>> flabels(num_items, 0.0);
+    std::vector<float> flabels(num_items, 0.0);
 
     for (int item_id = 0; item_id < num_items; ++item_id)
     {
@@ -94,7 +94,7 @@ void load_mnist(const char *image_filename,
 
         for (uint j = 0; j < rows * cols; j++)
         {
-            fpixels[item_id][j] = atof(pixels[j]);
+            fpixels[item_id][j] = stof(pixels[j]);
         }
 
         // read label
@@ -112,7 +112,6 @@ void load_mnist(const char *image_filename,
     delete[] pixels;
 
     /* Partition Data */
-    size_t partitions = num_items / batch_size;
 
     for (uint j = 0; j < num_items; j += batch_size)
     {
