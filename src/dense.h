@@ -32,14 +32,15 @@ public:
 	void forward(const Matrix &X);
 
 	void set_dJ(const Matrix &dJ) { dH_ = dJ; }
-
+	void set_wparam(const Matrix &W) { W_ = W; }
+	void set_bparam(const Matrix &B) { B_ = B; }
 	void set_delta(const Matrix &delta) { dH_ *= delta; }
 
 	float BCELoss(const Matrix &Y, float &accuracy) override
 	{
 		assert(init_);
 
-		accuracy = H_.bin().compare(Y) / Y.shape().first;
+		accuracy = H_.bin().compare(Y) / Y.first;
 
 		dH_ *= ((-1.0 * H_ / Y + (1.0 - Y) / (1.0 - H_)));
 
@@ -63,7 +64,7 @@ public:
 
 		dH_ = H_ - Y;
 
-		accuracy = H_.bin().compare(Y) / Y.shape().first;
+		accuracy = H_.bin().compare(Y) / Y.first;
 
 		return ((-1.0 * Y) * H_.log()).sum() / Y.shape().first;
 	}

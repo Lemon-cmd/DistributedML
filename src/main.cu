@@ -20,6 +20,11 @@ int main()
 	std::cout << X.compare(Y) << std::endl;
 	*/
 
+	std::vector<float> data(30, 0.0);
+	data[8] = 1.0;
+	data[16] = 1.0;
+	data[24] = 1.0;
+
 	Matrix X(3, 5), Y(3, 10);
 	X.Random();
 	Y.Constant(1);
@@ -37,7 +42,7 @@ int main()
 		network[j].init(network[j - 1].OutShape());
 	}
 
-	network.back() = Dense(10, "sigmoid", 0.001);
+	network.back() = Dense(10, "softmax", 0.001);
 	network.back().init(network[network.size() - 2].OutShape());
 
 	std::cout << "Training:\n";
@@ -53,7 +58,7 @@ int main()
 			network[j].forward(network[j - 1].Get_H());
 		}
 
-		float loss = network.back().BCELoss(Y, accuracy);
+		float loss = network.back().CrossEntropyLoss(Y, accuracy);
 		std::cout << "L: " << loss << " A: " << accuracy << std::endl;
 
 		// network.back().ToHost();

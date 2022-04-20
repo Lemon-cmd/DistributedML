@@ -21,6 +21,8 @@ public:
 	virtual void forward(const Matrix &X) = 0;
 
 	virtual void set_dJ(const Matrix &dJ) = 0;
+	virtual void set_wparam(const Matrix &W) = 0;
+	virtual void set_bparam(const Matrix &B) = 0;
 	virtual void set_delta(const Matrix &delta) = 0;
 
 	virtual const Matrix &Get_wparam() const = 0;
