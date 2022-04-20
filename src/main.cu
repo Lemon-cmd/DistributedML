@@ -36,20 +36,16 @@ int main()
 	Matrix X(100, 5), Y(100, 10);
 	X.Random();
 	Y.Constant(1);
-	X.ToDevice();
-	Y.ToDevice();
 
 	std::vector<Dense> network(3);
 
 	network[0] = Dense(100, "identity");
 	network[0].init(5);
-	network[0].ToDevice();
 
 	for (uint j = 1; j < network.size(); j++)
 	{
 		network[j] = Dense(100 - j, "identity");
 		network[j].init(network[j - 1].OutShape());
-		network[j].ToDevice();
 	}
 
 	network[0].forward(X);

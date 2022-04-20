@@ -121,7 +121,7 @@ void Dense::forward(const Matrix &X)
 	ones_ = Matrix(X.shape().first, 1);
 
 	// m x d * d x dk + m x 1 * 1 x dk
-	H_ = X.dot(W_) + ones.dot(B_);
+	H_ = X.dot(W_) + ones_.dot(B_);
 
 	dH_ = H_;
 
