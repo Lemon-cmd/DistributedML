@@ -53,17 +53,30 @@ int main()
 	network.back() = Dense(10, "softmax");
 	network.back().init(network[network.size() - 2].OutShape());
 
-	std::cout << "Forward:\n";
-
-	network[0].forward(X);
-	for (uint j = 1; j < network.size(); j++)
+	std::cout << "Training:\n";
+	uint epochs = 10;
+	for (uint e = 0; e < epochs; e++)
 	{
-		network[j].forward(network[j - 1].Get_H());
-	}
 
-	std::cout << "Loss:\n";
-	float loss = network.back().MSELoss(Y, accuracy);
-	std::cout << "L: " << loss << std::endl;
+		// Forward pass
+		network[0].forward(X);
+		for (uint j = 1; j < network.size(); j++)
+		{
+			network[j].forward(network[j - 1].Get_H());
+		}
+
+		float loss = network.back().MSELoss(Y, accuracy);
+		std::cout << "L: " << loss << std::endl;
+
+		// Update
+		network.back().update();
+
+		for (uint j = network.size() - 2; j >= 0; j--)
+		{
+			network[j].set_delta(network[j + 1].Get_delta());
+			network[j].update();
+		}
+	}
 
 	network.back().ToHost();
 	std::cout << network.back().Get_H() << '\n';
