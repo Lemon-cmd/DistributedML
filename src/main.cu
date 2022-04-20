@@ -41,16 +41,16 @@ int main()
 
 	std::cout << "Init:\n";
 
-	network[0] = Dense(3, "relu");
+	network[0] = Dense(3, "relu", 0.01);
 	network[0].init(5);
 
 	for (uint j = 1; j < network.size() - 1; j++)
 	{
-		network[j] = Dense(3, "sigmoid");
+		network[j] = Dense(3, "sigmoid", 0.1);
 		network[j].init(network[j - 1].OutShape());
 	}
 
-	network.back() = Dense(10, "relu");
+	network.back() = Dense(10, "sigmoid", 0.001);
 	network.back().init(network[network.size() - 2].OutShape());
 
 	std::cout << "Training:\n";
@@ -65,7 +65,7 @@ int main()
 			network[j].forward(network[j - 1].Get_H());
 		}
 
-		float loss = network.back().MSELoss(Y, accuracy);
+		float loss = network.back().BCELoss(Y, accuracy);
 		std::cout << "L: " << loss << std::endl;
 
 		network.back().ToHost();

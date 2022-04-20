@@ -14,7 +14,7 @@ public:
 
 	Dense(size_t neurons,
 		  const string &afunc = "sigmoid",
-		  float lr = 1e-3, float er = 1e-8);
+		  float lr = 0.01, float er = 1e-8);
 
 	void init(size_t in_dim);
 	void init(size_t batch_dim, size_t in_dim);
@@ -39,7 +39,7 @@ public:
 	{
 		assert(init_);
 
-		dH_ *= ((-H_ / Y + (1.0 - Y) / (1.0 - H)));
+		dH_ *= ((-H_ / Y + (1.0 - Y) / (1.0 - H_)));
 
 		return -(Y * H_.log() + (1.0 - Y) * (1.0 - H_).log()).sum() / Y.shape().first;
 	}
@@ -139,7 +139,7 @@ void Dense::update()
 	dW = I_.dot(dH_);
 
 	// adam parameters
-	vw_ = 0.1 * vw_ + 0.9 * (dW.pow(2)).sum();
+	vw_ = 0.99 * vw_ + 0.01 * (dW.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk
