@@ -40,7 +40,7 @@ public:
 		assert(init_);
 		dH_ *= (H_ - Y);
 
-		return sqrtf((H_ - Y).pow(2.0).sum()) / H_.shape().first;
+		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / H_.shape().first;
 	}
 
 	float CrossEntropyLoss(const Matrix &Y, float &accuracy) override
@@ -60,7 +60,7 @@ private:
 	void init_weight()
 	{
 		B_.Constant(1.0);
-		W_.Uniform(-0.2, 0.2);
+		W_.Uniform(-0.5, 0.5);
 	}
 };
 
