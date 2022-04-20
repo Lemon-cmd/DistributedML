@@ -22,7 +22,7 @@ int main()
 	*/
 
 	std::vector<Matrix> images, labels;
-	load_mnist("../data/mnist-train-images";, "../data/mnist-train-labels", 100, images, labels);
+	load_mnist("../data/mnist-train-images", "../data/mnist-train-labels", 100, images, labels);
 
 	std::cout << images.size() << '\n'
 			  << labels.size() << '\n';
