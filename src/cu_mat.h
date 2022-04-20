@@ -653,19 +653,19 @@ Matrix Matrix::operator/(float val) const
 
 void Matrix::Log_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_log, this->size());
+    log_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
 void Matrix::Exp_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
+    exp_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
 void Matrix::Tanh_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_tanh, this->size());
+    tanh_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
@@ -697,7 +697,7 @@ Matrix Matrix::Log() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_log, this->size());
+    log_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
@@ -707,7 +707,7 @@ Matrix Matrix::Exp() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_exp, this->size());
+    exp_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
@@ -716,7 +716,7 @@ Matrix Matrix::Tanh() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_tanh, this->size());
+    tanh_arr<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
