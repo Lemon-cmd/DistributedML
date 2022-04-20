@@ -53,7 +53,7 @@ int main()
 		while (i < train_images.size())
 		{
 			// random index
-			k = random_idx(0, train_images.size());
+			uint k = random_idx(0, train_images.size());
 
 			float acc_batch = 0.0;
 			// Forward pass
