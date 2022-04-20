@@ -10,7 +10,7 @@ typedef std::pair<size_t, size_t> Shape;
 class Dense : public Layer
 {
 public:
-	Dense();
+	Dense() : vw_(0), vb_(0) {}
 
 	Dense(size_t neurons,
 		  const string &afunc = "sigmoid",
@@ -64,20 +64,10 @@ private:
 	}
 };
 
-Dense::Dense()
-{
-	vw_ = 0.0f;
-	vb_ = 0.0f;
-	out_dim_ = 0.0;
-	afunc_ = "identity";
-	SetActivation(func_);
-}
-
 Dense::Dense(size_t neurons,
 			 const string &afunc,
 			 float lr, float er)
 {
-	Dense();
 	lr_ = lr;
 	er_ = er;
 	afunc_ = afunc;
@@ -118,6 +108,7 @@ void Dense::forward(const Matrix &X)
 {
 	assert(init_);
 	ones_ = Matrix(X.shape().first, 1);
+	ones_.Constant(1.0);
 
 	// m x d * d x dk + m x 1 * 1 x dk
 	H_ = X.dot(W_) + ones_.dot(B_);
@@ -151,8 +142,8 @@ void Dense::update()
 	ones_ /= dH_.shape().first;
 
 	// adam parameters
-	vw_ = 0.1 * vw_ + 0.9 * (dW.pow(2)).sum();
-	vb_ = 0.1 * vb_ + 0.9 * (ones_.pow(2)).sum();
+	vw_ = 0.99 * vw_ + 0.01 * (dW.pow(2)).sum();
+	vb_ = 0.99 * vb_ + 0.01 * (ones_.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk
