@@ -59,21 +59,21 @@ public:
      *
      */
 
-    void log_();
-    void exp_();
-    void tanh_();
-    void sigmoid_();
-    void elu_(float alph = 1.0);
-    void sign_(float alph = 0.0);
-    void relu_(float alph = 0.0);
+    void Log_();
+    void Exp_();
+    void Tanh_();
+    void Sigmoid_();
+    void Elu_(float alph = 1.0);
+    void Sign_(float alph = 0.0);
+    void Relu_(float alph = 0.0);
 
-    Matrix log() const;
-    Matrix exp() const;
-    Matrix tanh() const;
-    Matrix sigmoid() const;
-    Matrix elu(float alph = 1.0) const;
-    Matrix sign(float alph = 0.0) const;
-    Matrix relu(float alph = 0.0) const;
+    Matrix Log() const;
+    Matrix Exp() const;
+    Matrix Tanh() const;
+    Matrix Sigmoid() const;
+    Matrix Elu(float alph = 1.0) const;
+    Matrix Sign(float alph = 0.0) const;
+    Matrix Relu(float alph = 0.0) const;
 
     /*
      *
@@ -135,21 +135,21 @@ private:
     cublasHandle_t handle;
     size_t rows = 1, cols = 1;
 
-    func_t<float> cu_log, cu_exp, cu_tanh,
-        cu_sigmoid;
+    func_t<float> cu_Log, cu_Exp, cu_Tanh,
+        cu_Sigmoid;
 
-    func_alph<float> cu_elu, cu_sign, cu_relu;
+    func_alph<float> cu_Elu, cu_Sign, cu_Relu;
 
     void allocDevFuncs()
     {
-        cudaAssert(cudaMemcpyFromSymbol(&cu_elu, p_elu<float>, sizeof(func_alph<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_relu, p_relu<float>, sizeof(func_alph<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_sign, p_sign<float>, sizeof(func_alph<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Elu, p_Elu<float>, sizeof(func_alph<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Relu, p_Relu<float>, sizeof(func_alph<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Sign, p_Sign<float>, sizeof(func_alph<float>)));
 
-        cudaAssert(cudaMemcpyFromSymbol(&cu_log, p_log<float>, sizeof(func_t<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_exp, p_exp<float>, sizeof(func_t<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_tanh, p_tanh<float>, sizeof(func_t<float>)));
-        cudaAssert(cudaMemcpyFromSymbol(&cu_sigmoid, p_sigmoid<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Log, p_Log<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Exp, p_Exp<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Tanh, p_Tanh<float>, sizeof(func_t<float>)));
+        cudaAssert(cudaMemcpyFromSymbol(&cu_Sigmoid, p_Sigmoid<float>, sizeof(func_t<float>)));
     }
 
     void ModifyDevMat(const float *val, uint type = 0)
@@ -183,6 +183,7 @@ private:
             cuda = true;
             cublasAssert(cublasCreate(&handle));
             cudaAssert(cudaMalloc(&dev_mat, bytes()));
+            cudaAssert(cudaMemset(dev_mat, 0, bytes()));
             cudaAssert(cudaMemcpy(dev_mat, host_mat.data(), bytes(), cudaMemcpyHostToDevice));
         }
 
@@ -650,106 +651,106 @@ Matrix Matrix::operator/(float val) const
  *
  */
 
-void Matrix::log_()
+void Matrix::Log_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_log, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Log, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::exp_()
+void Matrix::Exp_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_exp, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Exp, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::tanh_()
+void Matrix::Tanh_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_tanh, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Tanh, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::sigmoid_()
+void Matrix::Sigmoid_()
 {
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sigmoid, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Sigmoid, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::elu_(float alph)
+void Matrix::Elu_(float alph)
 {
-    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_elu, alph, this->size());
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Elu, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::sign_(float alph)
+void Matrix::Sign_(float alph)
 {
-    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_sign, alph, this->size());
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Sign, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-void Matrix::relu_(float alph)
+void Matrix::Relu_(float alph)
 {
-    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_relu, alph, this->size());
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(dev_mat, cu_Relu, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
 }
 
-Matrix Matrix::log() const
+Matrix Matrix::Log() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_log, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Log, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
 
-Matrix Matrix::exp() const
+Matrix Matrix::Exp() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_exp, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Exp, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
-Matrix Matrix::tanh() const
+Matrix Matrix::Tanh() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_tanh, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Tanh, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
-Matrix Matrix::sigmoid() const
+Matrix Matrix::Sigmoid() const
 {
     Matrix item(*this);
 
-    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_sigmoid, this->size());
+    apply_non_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Sigmoid, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
-Matrix Matrix::elu(float alph) const
+Matrix Matrix::Elu(float alph) const
 {
     Matrix item(*this);
 
-    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_elu, alph, this->size());
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Elu, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
-Matrix Matrix::sign(float alph) const
+Matrix Matrix::Sign(float alph) const
 {
     Matrix item(*this);
-    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_sign, alph, this->size());
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Sign, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
 }
-Matrix Matrix::relu(float alph) const
+Matrix Matrix::Relu(float alph) const
 {
     Matrix item(*this);
-    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_relu, alph, this->size());
+    apply_alph<float><<<(size() - 1) / BLOCK_SIZE + 1, BLOCK_SIZE>>>(item.dev_mat, cu_Relu, alph, this->size());
     cudaAssert(cudaDeviceSynchronize());
 
     return item;
