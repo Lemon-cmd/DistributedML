@@ -136,7 +136,7 @@ __global__ void relu_arr(T *A, const T alph, const size_t size)
 	for (uint j = idx; j < size; j += stride)
 	{
 		if (A[j] < 0.0)
-			A[j] = alph * A[j];
+			A[j] = alph;
 	}
 }
 

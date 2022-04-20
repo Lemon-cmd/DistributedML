@@ -40,7 +40,7 @@ public:
 		assert(init_);
 		dH_ *= (H_ - Y);
 
-		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / H_.shape().first;
+		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / Y.shape().first;
 	}
 
 	float CrossEntropyLoss(const Matrix &Y, float &accuracy) override
@@ -49,7 +49,7 @@ public:
 
 		dH_ = H_ - Y;
 
-		return ((-1.0 * Y) * H_.log()).sum() / H_.shape().first;
+		return ((-1.0 * Y) * H_.log()).sum() / Y.shape().first;
 	}
 
 private:
@@ -107,11 +107,9 @@ void Dense::ToHost()
 void Dense::forward(const Matrix &X)
 {
 	assert(init_);
-	ones_ = Matrix(X.shape().first, 1);
-	ones_.Constant(1.0);
 
 	// m x d * d x dk + m x 1 * 1 x dk
-	H_ = X.dot(W_) + ones_.dot(B_);
+	H_ = X.dot(W_);
 
 	dH_ = H_;
 
@@ -131,19 +129,8 @@ void Dense::update()
 	// d x m * m x dk -> d x dk
 	dW = I_.dot(dH_);
 
-	// M x 1 -> 1 x M
-	ones_.T_();
-
-	// let ones now be the gradient w.r.t Bias
-	// (1 x M) * (M x dk) -> (1 x dK)
-	ones_.dot_(dH_); // sum
-
-	// average
-	ones_ /= dH_.shape().first;
-
 	// adam parameters
 	vw_ = 0.1 * vw_ + 0.9 * (dW.pow(2)).sum();
-	vb_ = 0.1 * vb_ + 0.9 * (ones_.pow(2)).sum();
 
 	// W : dk x d
 	// dH : m x dk
@@ -151,11 +138,9 @@ void Dense::update()
 	lgrad_ = dH_.dot(W_.T());
 
 	dW *= (lr_ / sqrtf(vw_ + er_));
-	ones_ *= (lr_ / sqrtf(vb_ + er_));
 
 	// update parameters
 	W_ -= dW;
-	B_ -= ones_;
 }
 
 #endif
