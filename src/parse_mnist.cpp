@@ -1,6 +1,8 @@
 #ifndef __MNIST_PARSER__
 #define __MNIST_PARSER__
 
+#include "cu_mat.h"
+
 #include <iostream>
 #include <fstream>
 
@@ -21,8 +23,11 @@ float *char_to_int(char *val, int size)
     return out;
 }
 
-// std::vector<float *> &img, std::vector<float *> &labels
-void load_mnist(size_t batch_size, const char *image_filename, const char *label_filename)
+void load_mnist(const char *image_filename,
+                const char *label_filename,
+                size_t batch_size,
+                std::vector<Matrix> images,
+                std::vector<Matrix> labels, )
 {
     // Open files
     std::ifstream image_file(image_filename, std::ios::in | std::ios::binary);
@@ -65,9 +70,6 @@ void load_mnist(size_t batch_size, const char *image_filename, const char *label
         return;
     }
 
-    // labels.resize(num_items);
-    // img.resize(num_items);
-
     image_file.read(reinterpret_cast<char *>(&rows), 4);
     rows = swap_endian(rows);
 
@@ -79,36 +81,68 @@ void load_mnist(size_t batch_size, const char *image_filename, const char *label
 
     char label;
     char *pixels = new char[rows * cols];
-    float *img = new float[rows * cols];
 
-    size_t partitions = num_items / batch_size;
+    std::vector<std::vector<float>> fpixels(num_items,
+                                            std::vector<float>(rows * cols, 0.0));
+
+    std::vector<std::vector<float>> flabels(num_items, 0.0);
 
     for (int item_id = 0; item_id < num_items; ++item_id)
     {
         // read image pixel
         image_file.read(pixels, rows * cols);
 
+        for (uint j = 0; j < rows * cols; j++)
+        {
+            fpixels[item_id][j] = atof(pixels[j]);
+        }
+
         // read label
         label_file.read(&label, 1);
 
-        std::string sLabel = std::to_string(int(label));
+        if (label == 7)
+            flabels[item_id] = 1.0;
+        else
+            flabels[item_id] = 0.0;
 
-        std::cout << "label is: " << sLabel << std::endl;
-        // std::cout << "shape: " << rows << ' ' << cols << std::endl;
-
-        // img[item_id] = Eigen::TensorMap<Eigen::Tensor<float, 3>>(char_to_int(pixels, rows * cols), Eigen::DSizes<ptrdiff_t, 3>{1, rows, cols});
-        // labels[item_id] = Eigen::Tensor<float, 3>{1, 1, 10};
-        // labels[item_id](0, 0, label) = 1.0;
+        // std::string sLabel = std::to_string(int(label));
+        // std::cout << "label is: " << sLabel << std::endl;
     }
 
     delete[] pixels;
+
+    /* Partition Data */
+    size_t partitions = num_items / batch_size;
+
+    for (uint j = 0; j < num_items; j += batch_size)
+    {
+        std::vector<float> lab_slice(flabels.begin() + j, flabels.begin() + j + batch_size);
+
+        std::vector<float> slice_data;
+        std::vector<std::vector<float>> slice(fpixels.begin() + j, fpixels.begin() + j + batch_size);
+
+        for (uint i = 0; i < batch_size; i++)
+        {
+            for (uint k = 0; k < rows * cols; k++)
+            {
+                slice_data.push_back(slice[i][k]);
+            }
+        }
+
+        Matrix Y(batch_size, 1, lab_slice);
+        Matrix X(batch_size, rows * cols, slice_data);
+
+        images.push_back(X);
+
+        labels.push_back(Y);
+    }
 }
 
 int main()
 {
     char *buff1 = "../data/mnist-train-images";
     char *buff2 = "../data/mnist-train-labels";
-    load_mnist(buff1, buff2);
+    load_mnist(buff1, buff2, 100);
 }
 
 #endif
