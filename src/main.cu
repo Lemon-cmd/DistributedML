@@ -2,6 +2,7 @@
 #include "cu_mat.h"
 #include "dense.h"
 #include "clockcycle.h"
+#include "parse_mnist.h"
 
 int main()
 {
@@ -19,6 +20,15 @@ int main()
 
 	std::cout << X.compare(Y) << std::endl;
 	*/
+
+	char *buff1 = "../data/mnist-train-images";
+	char *buff2 = "../data/mnist-train-labels";
+
+	std::vector<Matrix> images, labels;
+	load_mnist(buff1, buff2, 100, images, labels);
+
+	std::cout << images.size() << '\n'
+			  << labels.size() << '\n';
 
 	std::vector<float> data(30, 0.0);
 	data[8] = 1.0;

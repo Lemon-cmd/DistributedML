@@ -138,16 +138,4 @@ void load_mnist(const char *image_filename,
     std::cout << "Partitions: " << num_items / batch_size << std::endl;
 }
 
-int main()
-{
-    char *buff1 = "../data/mnist-train-images";
-    char *buff2 = "../data/mnist-train-labels";
-
-    std::vector<Matrix> images, labels;
-    load_mnist(buff1, buff2, 100, images, labels);
-
-    std::cout << images.size() << '\n'
-              << labels.size() << '\n';
-}
-
 #endif
