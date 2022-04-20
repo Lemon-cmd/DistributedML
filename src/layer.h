@@ -15,7 +15,6 @@ class Layer
 {
 public:
 	virtual void ToHost() = 0;
-	virtual void ToDevice() = 0;
 	virtual void init(size_t in_dim) = 0;
 
 	virtual void update() = 0;
@@ -94,9 +93,9 @@ protected:
 		Matrix ones(Z.shape().second, Z.shape().second);
 		ones.Constant(1.0);
 
-		Z.Exp();
+		Z.exp_();
 
-		Matrix denom = Z.dot(ones_cols);
+		Matrix denom = Z.dot(ones);
 		Z /= denom;
 	}
 

@@ -20,7 +20,6 @@ public:
 	void init(size_t batch_dim, size_t in_dim);
 
 	void ToHost();
-	void ToDevice();
 
 	const Matrix &Get_bparam() const { return B_; }
 	const Matrix &Get_wparam() const { return W_; }
@@ -41,7 +40,7 @@ public:
 		assert(init_);
 		dH_ *= (H_ - Y);
 
-		return sqrtf((H_ - Y).pow(2.0).sum()) / H.shape().first;
+		return sqrtf((H_ - Y).pow(2.0).sum()) / H_.shape().first;
 	}
 
 	float CrossEntropyLoss(const Matrix &Y, float &accuracy) override
@@ -50,7 +49,7 @@ public:
 
 		dH_ = H_ - Y;
 
-		return (-1.0 * (Y * H.log())).sum() / H.shape().first;
+		return (-1.0 * (Y * H_.log())).sum() / H_.shape().first;
 	}
 
 private:
@@ -109,23 +108,11 @@ void Dense::ToHost()
 {
 	assert(init_);
 
-	if (cuda_)
-	{
-		W_.ToHost();
-		B_.ToHost();
-		H_.ToHost();
-		dH_.ToHost();
-		lgrad_.ToHost();
-	}
-}
-
-void Dense::ToDevice()
-{
-	assert(init_);
-
-	cuda_ = true;
-	W_.ToDevice();
-	B_.ToDevice();
+	W_.ToHost();
+	B_.ToHost();
+	H_.ToHost();
+	dH_.ToHost();
+	lgrad_.ToHost();
 }
 
 void Dense::forward(const Matrix &X)
