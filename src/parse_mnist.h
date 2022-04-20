@@ -135,8 +135,6 @@ void load_mnist(const char *image_filename,
         images.push_back(X);
         labels.push_back(Y);
     }
-
-    std::cout << "Partitions: " << num_items / batch_size << std::endl;
 }
 
 #endif

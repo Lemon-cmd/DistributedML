@@ -22,65 +22,70 @@ int main()
 	*/
 
 	std::vector<Matrix> train_images, train_labels;
-	load_mnist("../data/train-images-idx3-ubyte", "../data/train-labels-idx1-ubyte", 100, images, labels);
+	load_mnist("../data/train-images-idx3-ubyte",
+			   "../data/train-labels-idx1-ubyte",
+			   100, train_images, train_labels);
 
 	std::vector<Matrix> test_images, test_labels;
-	load_mnist("../data/t10k-images-idx3-ubyte", "../data/t10k-labels-idx1-ubyte", 100, images, labels);
+	load_mnist("../data/t10k-images-idx3-ubyte",
+			   "../data/t10k-labels-idx1-ubyte",
+			   100, test_images, test_labels);
 
 	std::cout << train_images.size() << '\n'
 			  << train_labels.size() << '\n';
-
-	std::vector<float> data(30, 0.0);
-	data[8] = 1.0;
-	data[16] = 1.0;
-	data[24] = 1.0;
-
-	Matrix X(3, 5), Y(3, 10);
-	X.Random();
-	Y.Constant(1);
 
 	std::vector<Dense> network(3);
 
 	std::cout << "Init:\n";
 
 	network[0] = Dense(30, "relu", 0.01);
-	network[0].init(5);
+	network[0].init(28 * 28);
 
 	for (uint j = 1; j < network.size() - 1; j++)
 	{
-		network[j] = Dense(50, "sigmoid", 0.1);
+		network[j] = Dense(50, "tanh", 0.1);
 		network[j].init(network[j - 1].OutShape());
 	}
 
-	network.back() = Dense(10, "softmax", 0.001);
+	network.back() = Dense(1, "sigmoid", 0.001);
 	network.back().init(network[network.size() - 2].OutShape());
 
 	std::cout << "Training:\n";
 	uint epochs = 10;
+
 	for (uint e = 0; e < epochs; e++)
 	{
-		float accuracy = 0.0;
+		float loss, acc = 0.0, 0.0;
 
-		// Forward pass
-		network[0].forward(X);
-		for (uint j = 1; j < network.size(); j++)
+		for (uint k = 0; k < train_images.size(); k++)
 		{
-			network[j].forward(network[j - 1].Get_H());
+			float acc_batch = 0.0;
+			// Forward pass
+			network[0].forward(X);
+			for (uint j = 1; j < network.size(); j++)
+			{
+				network[j].forward(network[j - 1].Get_H());
+			}
+
+			loss += network.back().BCELoss(Y, acc_batch);
+			acc += acc_batch;
+
+			// network.back().ToHost();
+			// std::cout << "H: " << network.back().Get_H() << std::endl;
+
+			// Update
+			network.back().update();
+
+			for (int j = network.size() - 2; j >= 0; j--)
+			{
+				network[j].set_delta(network[j + 1].Get_delta());
+				network[j].update();
+			}
 		}
 
-		float loss = network.back().CrossEntropyLoss(Y, accuracy);
-		std::cout << "L: " << loss << " A: " << accuracy << std::endl;
+		loss /= train_images.size();
+		acc /= train_images.size();
 
-		// network.back().ToHost();
-		// std::cout << "H: " << network.back().Get_H() << std::endl;
-
-		// Update
-		network.back().update();
-
-		for (int j = network.size() - 2; j >= 0; j--)
-		{
-			network[j].set_delta(network[j + 1].Get_delta());
-			network[j].update();
-		}
+		std::cout << "L: " << loss << " A: " << acc << std::endl;
 	}
 }
