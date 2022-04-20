@@ -72,24 +72,8 @@ __global__ void match_arr(const T *A, const T *B, T *matches, const size_t size)
 	for (uint j = idx; j < size; j += stride)
 	{
 		if (abs(A[j] - B[j]) < 0.01)
-			matches++;
+			*matches++;
 	}
-}
-
-template <typename T>
-__device__ float comp(const T *A, const T *B, const size_t size)
-{
-	float count = 0.0;
-
-	for (uint j = 0; j < size; j++)
-	{
-		if (abs(A[j] - B[j]) < 0.01)
-		{
-			count++;
-		}
-	}
-
-	return count;
 }
 
 template <typename T>
