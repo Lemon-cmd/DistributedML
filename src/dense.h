@@ -158,7 +158,7 @@ void Dense::update()
 	dW *= (lr_ / sqrtf(vw_ + er_));
 
 	// update parameters
-	W_ -= dW;
+	W_ += dW;
 }
 
 #endif
