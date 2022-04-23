@@ -35,6 +35,11 @@ public:
 
 	virtual size_t OutShape() { return out_dim_; }
 
+    virtual float MSELossNoGrad(const Matrix &Y, float &accuracy) const { return 0; }
+	virtual float BCELossNoGrad(const Matrix &Y, float &accuracy) const { return 0; }
+	virtual float CrossEntropyLossNoGrad(const Matrix &Y, float &accuracy) const { return 0; }
+
+
 	virtual float MSELoss(const Matrix &Y, float &accuracy) { return 0; }
 	virtual float BCELoss(const Matrix &Y, float &accuracy) { return 0; }
 	virtual float CrossEntropyLoss(const Matrix &Y, float &accuracy) { return 0; }
