@@ -23,15 +23,16 @@ public:
 	virtual void set_dJ(const Matrix &dJ) = 0;
 	virtual void set_wparam(const Matrix &W) = 0;
 	virtual void set_bparam(const Matrix &B) = 0;
-	virtual void set_delta(const Matrix &delta) = 0;
+	virtual void set_lr(float lr) = 0;
+    virtual void set_delta(const Matrix &delta) = 0;
 
 	virtual const Matrix &Get_wparam() const = 0;
 	virtual const Matrix &Get_bparam() const = 0;
 
 	virtual const Matrix &Get_H() const = 0;
 	virtual const Matrix &Get_dJ() const = 0;
-
 	virtual const Matrix &Get_delta() const = 0;
+    virtual float get_lr() const = 0;
 
 	virtual size_t OutShape() { return out_dim_; }
 

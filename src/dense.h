@@ -24,13 +24,15 @@ public:
 	const Matrix &Get_bparam() const { return B_; }
 	const Matrix &Get_wparam() const { return W_; }
 
-	const Matrix &Get_H() const { return H_; }
+	float get_lr() const { return lr_; }
+    const Matrix &Get_H() const { return H_; }
 	const Matrix &Get_dJ() const { return dH_; }
 	const Matrix &Get_delta() const { return lgrad_; }
 
 	void update();
 	void forward(const Matrix &X);
 
+    void set_lr(float lr) { lr_ = lr; }  
 	void set_dJ(const Matrix &dJ) { dH_ = dJ; }
 	void set_wparam(const Matrix &W) { W_ = W; }
 	void set_bparam(const Matrix &B) { B_ = B; }
@@ -42,8 +44,6 @@ public:
 
 		accuracy = H_.bin().compare(Y) / Y.shape().first;
 
-		//dH_ *= ((-1.0 * H_ / Y + (1.0 - Y) / (1.0 - H_)));
-
 		return -(Y * H_.log() + (1.0 - Y) * (1.0 - H_).log()).sum() / Y.shape().first;
 	}
 
@@ -51,9 +51,7 @@ public:
 	{
 		assert(init_);
 
-		//dH_ *= (H_ - Y);
-
-		accuracy = H_.compare(Y) / Y.size();
+		accuracy = H_.bin().compare(Y) / Y.size();
 
 		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / Y.shape().first;
 	}
@@ -61,8 +59,6 @@ public:
 	float CrossEntropyLossNoGrad(const Matrix &Y, float &accuracy) const override
 	{
 		assert(init_);
-
-		//dH_ *= (-1.0 * Y / H_);
 
 		accuracy = H_.bin().compare(Y) / Y.shape().first;
 
@@ -85,7 +81,7 @@ public:
 
 		dH_ *= (H_ - Y);
 
-		accuracy = H_.compare(Y) / Y.size();
+		accuracy = H_.bin().compare(Y) / Y.size();
 
 		return 0.5 * sqrtf((H_ - Y).pow(2.0).sum()) / Y.shape().first;
 	}
@@ -190,7 +186,7 @@ void Dense::update()
 	dW *= (lr_ / sqrtf(vw_ + er_));
 
 	// update parameters
-	W_ += dW;
+	W_ -= dW;
 }
 
 #endif
