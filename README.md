@@ -74,9 +74,12 @@ A.dot(B);  // non in-place
 The same applies to element-wise operations (which are common operators)
 ```
 A += B;   // in-place
-A + B     // non in-place
+A + B;    // non in-place
 ```
 
 There are other important functions as well (e.g., pow, sum, exp, log, etc...).
 
-
+```
+A.pow_(2);  // in-place
+A.pow(2);   // non in-place
+```
