@@ -39,6 +39,7 @@ mpi_network <Input Dim> <# hidden layers> <layer sizes...> <Output Dim> <Epochs>
                 "tanh"
                 "identity"
                 "softmax"
+  --batch_size: [1-1024] 512 default
 ```
 
 Run a tanh network for 10 epochs with:  
