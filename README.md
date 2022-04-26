@@ -68,7 +68,6 @@ For example, matrix multiplication
 ```
 A.dot_(B); // in-place
 A.dot(B);  // non in-place
-
 ```
 
 The same applies to element-wise operations (which are common operators)
