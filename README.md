@@ -59,3 +59,24 @@ Modes:
 "ensemble" - create np separate NNs, with aggregation  
 "averaged" - after each epoch, each NN recieves an averaged gradient update from across all NNs
 
+## cuMatrix
+cuMatrix is a light-weight Matrix library that utilizes cuBlas and CUDA. The primary goal of this librabry is to provide a simple interface to perform simple linear algebra operations, such as matrix multiplication, transpose, hadamard product, etc. It is best to stress that there are no linear algebra solvers implemented in cuMatrix. 
+
+There are two types of operation in cuMatrix: in-place and non-in-place 
+
+For example, matrix multiplication
+```
+A.dot_(B); // in-place
+A.dot(B);  // non in-place
+
+```
+
+The same applies to element-wise operations (which are common operators)
+```
+A += B;   // in-place
+A + B     // non in-place
+```
+
+There are other important functions as well (e.g., pow, sum, exp, log, etc...).
+
+
