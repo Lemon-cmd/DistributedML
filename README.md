@@ -83,3 +83,11 @@ There are other important functions as well (e.g., pow, sum, exp, log, etc...).
 A.pow_(2);  // in-place
 A.pow(2);   // non in-place
 ```
+
+Important mathematical functions, however, are non in-place for now.
+```
+A.log();  
+A.exp(); 
+A.relu(alpha = 2);
+A.sign(alpha = 0);
+```
