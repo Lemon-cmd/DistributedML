@@ -51,6 +51,10 @@ Run a tanh network for 10 epochs with:
 $ mpirun -np 16 mpi_network 5 3 10 20 15 2 10 --activation tanh
 ```
 
+However this only works with the MNIST dataset:
+```
+$ mpirun -np 16 mpi_network 784 3 256 256 256 1 10 --activation ELU
+```
 Modes:  
 "ensemble" - create np separate NNs, with aggregation  
 "averaged" - after each epoch, each NN recieves an averaged gradient update from across all NNs
